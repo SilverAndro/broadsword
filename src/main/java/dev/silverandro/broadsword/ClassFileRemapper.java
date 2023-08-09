@@ -199,33 +199,7 @@ public class ClassFileRemapper {
                             newOutput = mappingsSet.remapField(thisClass, original, utf8Copy.get(tracker.getDescIndex(index)));
 
                         case RemapType.SELF_METHOD_NAME -> {
-                            var desc = utf8Copy.get(tracker.getDescIndex(index));
-                            newOutput = mappingsSet.remapMethodOrNull(thisClass, original, desc);
-                            if (newOutput == null) {
-                                var superStruct = classInfoReq.lookupClassInfo(mappingsSet.remapClass(superClass));
-                                var methodDesc = superStruct.getMethodsAndDesc().get(original);
-                                if (desc.equals(methodDesc)) {
-                                    newOutput = mappingsSet.remapMethod(superClass, original, desc);
-                                } else {
-                                    // Advanced search!
-                                    // This could be arbitrarily deep in the inheritance tree, so build a queue of structs to try
-                                    // If a struct fails, enqueue its parents for later, this makes search breadth first
-                                    newOutput = original;
-                                    var searchQueue = new ArrayDeque<>(superStruct.getSuperAndInterfaceClasses());
-                                    searchQueue.addAll(List.of(interfaces));
-                                    while (!searchQueue.isEmpty()) {
-                                        var name = searchQueue.removeFirst();
-                                        var classStruct = classInfoReq.lookupClassInfo(mappingsSet.remapClass(name));
-                                        methodDesc = classStruct.getMethodsAndDesc().get(original);
-                                        if (desc.equals(methodDesc)) {
-                                            newOutput = mappingsSet.remapMethod(name, original, desc);
-                                            break;
-                                        } else {
-                                            searchQueue.addAll(classStruct.getSuperAndInterfaceClasses());
-                                        }
-                                    }
-                                }
-                            }
+                            newOutput = remapSelfMethod(classInfoReq, utf8Copy, tracker, index, mappingsSet, thisClass, original, superClass, interfaces);
                         }
 
                         default -> {}
@@ -261,6 +235,38 @@ public class ClassFileRemapper {
                 .put(constantPool.toByteArray())
                 .put(input);
         return bytes.array();
+    }
+
+    private static String remapSelfMethod(ClassMappingLookup classInfoReq, Int2ObjectAVLTreeMap<String> utf8Copy, ConstantPoolTracker tracker, int index, MappingsSet mappingsSet, String thisClass, String original, String superClass, String[] interfaces) {
+        String newOutput;
+        var desc = utf8Copy.get(tracker.getDescIndex(index));
+        newOutput = mappingsSet.remapMethodOrNull(thisClass, original, desc);
+        if (newOutput == null) {
+            var superStruct = classInfoReq.lookupClassInfo(superClass);
+            var methodDesc = superStruct.getMethodsAndDesc().get(original);
+            if (desc.equals(methodDesc)) {
+                newOutput = mappingsSet.remapMethod(superClass, original, desc);
+            } else {
+                // Advanced search!
+                // This could be arbitrarily deep in the inheritance tree, so build a queue of structs to try
+                // If a struct fails, enqueue its parents for later, this makes search breadth first
+                newOutput = original;
+                var searchQueue = new ArrayDeque<>(superStruct.getSuperAndInterfaceClasses());
+                searchQueue.addAll(List.of(interfaces));
+                while (!searchQueue.isEmpty()) {
+                    var name = searchQueue.removeFirst();
+                    var classStruct = classInfoReq.lookupClassInfo(name);
+                    methodDesc = classStruct.getMethodsAndDesc().get(original);
+                    if (desc.equals(methodDesc)) {
+                        newOutput = mappingsSet.remapMethod(name, original, desc);
+                        break;
+                    } else {
+                        searchQueue.addAll(classStruct.getSuperAndInterfaceClasses());
+                    }
+                }
+            }
+        }
+        return newOutput;
     }
 
     private static void eatAttributes(int count, ByteBuffer input) {

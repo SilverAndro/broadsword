@@ -13,7 +13,7 @@ package dev.silverandro.broadsword;
 public interface ClassMappingLookup {
     /**
      * Handles the request for class info from the remapper.
-     * @param className The name of the class that information is being requested on. This is in the target namespace.
+     * @param className The name of the class that information is being requested on. This is in the origin namespace.
      */
     ClassMappingStruct lookupClassInfo(String className);
 }
