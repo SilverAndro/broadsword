@@ -6,7 +6,7 @@ A java class file remapper with a focus on speed, by dropping frivolous features
 This library was primarily created for my projects that require remapping only at runtime or for other non-linking work,
 as such anything not critical for the class file to actually *run* in some namespace isn't processed or remapped.
 
-This library definitely has lots of edgecases, but for standard, javac-d code, it shouldnt be an issue.
+This library definitely has lots of edgecases, but for standard, javac'd code, it shouldnt be an issue.
 
 ### How does it work
 Rather than using ASM to read the class file, and then using a visitor to visit every possible node to remap
