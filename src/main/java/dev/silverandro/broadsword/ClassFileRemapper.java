@@ -23,7 +23,7 @@ public class ClassFileRemapper {
     private static final HashMap<String, MappingsSet> mappings = new HashMap<>();
 
     public static void registerMappings(String from, String to, MappingsSet mappings) {
-        ClassFileRemapper.mappings.put(from + to, mappings);
+        ClassFileRemapper.mappings.put(from + "->" + to, mappings);
     }
 
     /**
@@ -41,7 +41,7 @@ public class ClassFileRemapper {
      * @param classInfoReq The lookup used to request information on classes necessary for remapping
      */
     public static byte[] remapClassBytes(byte[] classFile, String originNamespace, String targetNamespace, ClassMappingLookup classInfoReq) throws IOException {
-        var mappingsKey = originNamespace + targetNamespace;
+        var mappingsKey = originNamespace + "->" + targetNamespace;
         var mappingsSet = mappings.get(mappingsKey);
 
         if (mappingsSet == null) {
