@@ -62,3 +62,9 @@ public class RemapClassFile {
     }
 }
 ```
+
+### How fast is it anyways
+
+On my laptop the current version at time of writing clocks in at ~760 test class remappings per second. I have
+yet to compare this work to [tiny-remapper](https://github.com/FabricMC/tiny-remapper) as that project is
+undocumented and its not a high priority for me. Please feel free to PR any comparisons or improvements!
