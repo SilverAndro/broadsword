@@ -98,9 +98,9 @@ public class ClassFileRemapper {
                 }
 
                 case CTags.DYNAMIC, CTags.INVOKE_DYNAMIC -> {
-                    var classIndex = input.getShort();
+                    input.getShort();
                     var ntIndex = input.getShort();
-                    tracker.putNtClass(ntIndex, classIndex);
+                    tracker.putMethodNT(ntIndex);
                 }
 
                 case CTags.NAME_AND_TYPE -> {
@@ -204,6 +204,8 @@ public class ClassFileRemapper {
                                 newOutput = mappingsSet.remapMethod(owner, original, desc);
                             } else if (nameType == RemapType.FIELD_NT) {
                                 newOutput = mappingsSet.remapField(owner, original, desc);
+                            } else {
+                                throw new IllegalStateException("NT structure at " + index + " has illegal name type " + nameType);
                             }
                         }
 
