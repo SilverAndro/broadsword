@@ -6,11 +6,14 @@ package dev.silverandro.broadsword.internal;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Various utility methods for working with ByteBuffers
  */
 public final class ByteBufferUtil {
+    private static final Charset charset = StandardCharsets.UTF_8;
     /**
      * Reads a string of length {@code length} from the byte buffer.
      *
@@ -19,19 +22,17 @@ public final class ByteBufferUtil {
      * skip {@code length} forward, so very cheap.
      */
     public static String readBytes(int length, ByteBuffer in) {
-        var out = new String(in.array(), in.position(), length);
+        var out = new String(in.array(), in.position(), length, charset);
         in.position(in.position() + length);
         return out;
     }
 
     /**
-     * Copies bytes from a ByteBuffer to a ByteArrayOutputStream. This method is not particularly fast, take care in
-     * its usage.
+     * Copies bytes from a ByteBuffer to a ByteArrayOutputStream.
      */
     public static void copyBytes(int count, ByteBuffer in, ByteArrayOutputStream out) {
-        while (count-- > 0) {
-            out.write(in.get());
-        }
+        out.write(in.array(), in.position(), count);
+        in.position(in.position() + count);
     }
 
     public static void skipBytes(int count, ByteBuffer buffer) {

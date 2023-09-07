@@ -13,12 +13,13 @@ import dev.silverandro.broadsword.ClassFileRemapper;
 public class RemapType {
     private RemapType() {}
 
-    public static final int CLASS = 1;
-    public static final int FIELD_NAME = 2;
-    public static final int METHOD_NAME = 3;
-    public static final int SELF_FIELD_NAME = 4;
-    public static final int SELF_METHOD_NAME = 5;
-    public static final int DESCRIPTOR = 6;
-    public static final int MODULE = 7;
-    public static final int PACKAGE = 8;
+    public static final int CLASS               = 1;
+    public static final int NAME_NT             = 2;
+    public static final int FIELD_NT            = 3;
+    public static final int METHOD_NT           = 4;
+    public static final int SELF_FIELD_NAME     = 5;
+    public static final int SELF_METHOD_NAME    = 6;
+    public static final int DESCRIPTOR          = 7;
+    public static final int MODULE              = 8;
+    public static final int PACKAGE             = 9;
 }

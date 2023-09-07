@@ -4,8 +4,6 @@
 
 package dev.silverandro.broadsword.internal;
 
-import it.unimi.dsi.fastutil.ints.Int2IntAVLTreeMap;
-
 /**
  * A class that allows for tracking all the necessary information for remapping a constant pool.
  * The actual data is abstracted over with some getters and setters, but its still pretty close to minimal.
@@ -14,80 +12,90 @@ import it.unimi.dsi.fastutil.ints.Int2IntAVLTreeMap;
  * the contextually wrong int into the map very easily, which can cause hard to debug issues.
  */
 public final class ConstantPoolTracker {
-    private final Int2IntAVLTreeMap indexToRemapType;
-    private final Int2IntAVLTreeMap classToUTF8;
-    private final Int2IntAVLTreeMap nameToNt;
-    private final Int2IntAVLTreeMap ntToOwnerClass;
-    private final Int2IntAVLTreeMap nameToDesc;
+    private final byte[] indexToRemapType;
+    // Works as both Name->NT and NT->OwnerClass
+    private final short[] ntData;
+    // Works as both Class->UTF8Content and Name->Desc
+    private final short[] contentMappings;
 
-    public ConstantPoolTracker() {
-        indexToRemapType = new Int2IntAVLTreeMap();
-        classToUTF8 = new Int2IntAVLTreeMap();
-        nameToNt = new Int2IntAVLTreeMap();
-        ntToOwnerClass = new Int2IntAVLTreeMap();
-        nameToDesc = new Int2IntAVLTreeMap();
+    public ConstantPoolTracker(int upperBound) {
+        indexToRemapType = new byte[upperBound];
+        ntData = new short[upperBound];
+        contentMappings = new short[upperBound];
     }
 
     //
     // Put Operations
     //
     public void putClass(int index, int contentIndex) {
-        indexToRemapType.put(contentIndex, RemapType.CLASS);
-        classToUTF8.put(index, contentIndex);
+        indexToRemapType[contentIndex] = RemapType.CLASS;
+        contentMappings[index] = (short) contentIndex;
+    }
+
+    public void putNameToDesc(int nameIndex, int descIndex) {
+        contentMappings[nameIndex] = (short) descIndex;
+        putDescriptor(descIndex);
     }
 
     public void putSelfFieldName(int index, int descIndex) {
-        indexToRemapType.put(index, RemapType.SELF_FIELD_NAME);
-        nameToDesc.put(index, descIndex);
+        indexToRemapType[index] = RemapType.SELF_FIELD_NAME;
+        contentMappings[index] = (short) descIndex;
     }
 
     public void putSelfMethodName(int index, int descIndex) {
-        indexToRemapType.put(index, RemapType.SELF_METHOD_NAME);
-        nameToDesc.put(index, descIndex);
+        indexToRemapType[index] = RemapType.SELF_METHOD_NAME;
+        contentMappings[index] = (short) descIndex;
     }
 
-    public void putMethodName(int index, boolean isSelfMethod) {
-        var rType = RemapType.METHOD_NAME;
-        if (isSelfMethod) rType = RemapType.SELF_METHOD_NAME;
-        indexToRemapType.put(index, RemapType.METHOD_NAME);
+    public void putFieldNT(int index) {
+        indexToRemapType[index] = RemapType.FIELD_NT;
+    }
+
+    public void putMethodNT(int index) {
+        indexToRemapType[index] = RemapType.METHOD_NT;
     }
 
     public void putDescriptor(int index) {
-        indexToRemapType.put(index, RemapType.DESCRIPTOR);
+        indexToRemapType[index] = RemapType.DESCRIPTOR;
     }
 
     public void putModule(int index) {
-        indexToRemapType.put(index, RemapType.MODULE);
+        indexToRemapType[index] = RemapType.MODULE;
     }
 
     public void putPackage(int index) {
-        indexToRemapType.put(index, RemapType.PACKAGE);
+        indexToRemapType[index] = RemapType.PACKAGE;
     }
 
     public void putNtName(int index, int nameIndex) {
-        nameToNt.put(nameIndex, index);
+        indexToRemapType[nameIndex] = RemapType.NAME_NT;
+        ntData[nameIndex] = (short) index;
     }
 
     public void putNtClass(int ntIndex, int classIndex) {
-        ntToOwnerClass.put(ntIndex, classIndex);
+        ntData[ntIndex] = (short) classIndex;
     }
 
     //
     // Get Operations
     //
     public int getClassContent(int index) {
-        return classToUTF8.get(index);
+        return contentMappings[index];
     }
 
     public int getRemapType(int index) {
-        return indexToRemapType.get(index);
+        return indexToRemapType[index];
     }
 
     public int getDescIndex(int nameIndex) {
-        return nameToDesc.get(nameIndex);
+        return contentMappings[nameIndex];
+    }
+
+    public int getNameNT(int nameIndex) {
+        return ntData[nameIndex];
     }
 
     public int getNameOwner(int nameIndex) {
-        return ntToOwnerClass.get(nameToNt.get(nameIndex));
+        return ntData[getNameNT(nameIndex)];
     }
 }

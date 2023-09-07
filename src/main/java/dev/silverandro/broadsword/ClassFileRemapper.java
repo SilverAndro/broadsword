@@ -67,7 +67,7 @@ public class ClassFileRemapper {
         // Copy all UFT-8 data into memory to assist in remapping
         var utf8Copy = new Int2ObjectAVLTreeMap<String>();
         // Keep track of info
-        var tracker = new ConstantPoolTracker();
+        var tracker = new ConstantPoolTracker(count);
 
         // Read through all the constant pool entries
         while (index < count) {
@@ -84,7 +84,21 @@ public class ClassFileRemapper {
                     tracker.putClass(index, contentIndex);
                 }
 
-                case CTags.FIELD, CTags.METHOD, CTags.INTERFACE_METHOD, CTags.DYNAMIC, CTags.INVOKE_DYNAMIC -> {
+                case CTags.FIELD -> {
+                    var classIndex = input.getShort();
+                    var ntIndex = input.getShort();
+                    tracker.putFieldNT(ntIndex);
+                    tracker.putNtClass(ntIndex, classIndex);
+                }
+
+                case CTags.METHOD, CTags.INTERFACE_METHOD -> {
+                    var classIndex = input.getShort();
+                    var ntIndex = input.getShort();
+                    tracker.putMethodNT(ntIndex);
+                    tracker.putNtClass(ntIndex, classIndex);
+                }
+
+                case CTags.DYNAMIC, CTags.INVOKE_DYNAMIC -> {
                     var classIndex = input.getShort();
                     var ntIndex = input.getShort();
                     tracker.putNtClass(ntIndex, classIndex);
@@ -94,7 +108,7 @@ public class ClassFileRemapper {
                     var nameIndex = input.getShort();
                     var descIndex = input.getShort();
                     tracker.putNtName(index, nameIndex);
-                    tracker.putDescriptor(descIndex);
+                    tracker.putNameToDesc(nameIndex, descIndex);
                 }
 
                 case CTags.STRING -> input.getShort();
@@ -183,16 +197,15 @@ public class ClassFileRemapper {
 
                         case RemapType.PACKAGE -> newOutput = mappingsSet.remapPackage(original);
 
-                        case RemapType.FIELD_NAME -> {
+                        case RemapType.NAME_NT -> {
+                            var nameType = tracker.getRemapType(tracker.getNameNT(index));
+                            var owner = utf8Copy.get(tracker.getClassContent(tracker.getNameOwner(index)));
                             var desc = utf8Copy.get(tracker.getDescIndex(index));
-                            var owner = utf8Copy.get(tracker.getNameOwner(index));
-                            newOutput = mappingsSet.remapField(owner, original, desc);
-                        }
-
-                        case RemapType.METHOD_NAME -> {
-                            var desc = utf8Copy.get(tracker.getDescIndex(index));
-                            var owner = utf8Copy.get(tracker.getNameOwner(index));
-                            newOutput = mappingsSet.remapMethod(owner, original, desc);
+                            if (nameType == RemapType.METHOD_NT) {
+                                newOutput = mappingsSet.remapMethod(owner, original, desc);
+                            } else if (nameType == RemapType.FIELD_NT) {
+                                newOutput = mappingsSet.remapField(owner, original, desc);
+                            }
                         }
 
                         case RemapType.SELF_FIELD_NAME ->
