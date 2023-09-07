@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
  */
 public final class ByteBufferUtil {
     private static final Charset charset = StandardCharsets.UTF_8;
+
     /**
      * Reads a string of length {@code length} from the byte buffer.
      *

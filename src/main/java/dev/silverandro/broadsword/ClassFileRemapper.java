@@ -9,7 +9,6 @@ import dev.silverandro.broadsword.internal.CTags;
 import dev.silverandro.broadsword.internal.ConstantPoolTracker;
 import dev.silverandro.broadsword.internal.RemapType;
 import dev.silverandro.broadsword.mappings.MappingsSet;
-import it.unimi.dsi.fastutil.ints.Int2ObjectAVLTreeMap;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -65,7 +64,7 @@ public class ClassFileRemapper {
         // To be populated later, lets us remap field and method attr
         String thisClass;
         // Copy all UFT-8 data into memory to assist in remapping
-        var utf8Copy = new Int2ObjectAVLTreeMap<String>();
+        var utf8Copy = new String[count];
         // Keep track of info
         var tracker = new ConstantPoolTracker(count);
 
@@ -76,7 +75,7 @@ public class ClassFileRemapper {
                 case CTags.UTF8 -> {
                     var length = input.getShort();
                     var content = ByteBufferUtil.readBytes(length, input);
-                    utf8Copy.put(index, content);
+                    utf8Copy[index] = content;
                 }
 
                 case CTags.CLASS -> {
@@ -138,12 +137,12 @@ public class ClassFileRemapper {
 
         // Access flags, this, super, and interfaces
         input.getShort();
-        thisClass = utf8Copy.get(tracker.getClassContent(input.getShort()));
-        var superClass = utf8Copy.get(tracker.getClassContent(input.getShort()));
+        thisClass = utf8Copy[tracker.getClassContent(input.getShort())];
+        var superClass = utf8Copy[tracker.getClassContent(input.getShort())];
         var interfacesCount = input.getShort();
         var interfaces = new String[interfacesCount];
         while (interfacesCount-- > 0) {
-            interfaces[interfacesCount] = utf8Copy.get(tracker.getClassContent(input.getShort()));
+            interfaces[interfacesCount] = utf8Copy[tracker.getClassContent(input.getShort())];
         }
 
         // Generate fake NT structures
@@ -199,8 +198,8 @@ public class ClassFileRemapper {
 
                         case RemapType.NAME_NT -> {
                             var nameType = tracker.getRemapType(tracker.getNameNT(index));
-                            var owner = utf8Copy.get(tracker.getClassContent(tracker.getNameOwner(index)));
-                            var desc = utf8Copy.get(tracker.getDescIndex(index));
+                            var owner = utf8Copy[tracker.getClassContent(tracker.getNameOwner(index))];
+                            var desc = utf8Copy[tracker.getDescIndex(index)];
                             if (nameType == RemapType.METHOD_NT) {
                                 newOutput = mappingsSet.remapMethod(owner, original, desc);
                             } else if (nameType == RemapType.FIELD_NT) {
@@ -209,7 +208,7 @@ public class ClassFileRemapper {
                         }
 
                         case RemapType.SELF_FIELD_NAME ->
-                            newOutput = mappingsSet.remapField(thisClass, original, utf8Copy.get(tracker.getDescIndex(index)));
+                            newOutput = mappingsSet.remapField(thisClass, original, utf8Copy[tracker.getDescIndex(index)]);
 
                         case RemapType.SELF_METHOD_NAME -> {
                             newOutput = remapSelfMethod(classInfoReq, utf8Copy, tracker, index, mappingsSet, thisClass, original, superClass, interfaces);
@@ -250,9 +249,9 @@ public class ClassFileRemapper {
         return bytes.array();
     }
 
-    private static String remapSelfMethod(ClassMappingLookup classInfoReq, Int2ObjectAVLTreeMap<String> utf8Copy, ConstantPoolTracker tracker, int index, MappingsSet mappingsSet, String thisClass, String original, String superClass, String[] interfaces) {
+    private static String remapSelfMethod(ClassMappingLookup classInfoReq, String[] utf8Copy, ConstantPoolTracker tracker, int index, MappingsSet mappingsSet, String thisClass, String original, String superClass, String[] interfaces) {
         String newOutput;
-        var desc = utf8Copy.get(tracker.getDescIndex(index));
+        var desc = utf8Copy[tracker.getDescIndex(index)];
         newOutput = mappingsSet.remapMethodOrNull(thisClass, original, desc);
         if (newOutput == null) {
             var superStruct = classInfoReq.lookupClassInfo(superClass);
