@@ -40,7 +40,7 @@ public class ClassFileRemapper {
      * @param classInfoReq The lookup used to request information on classes necessary for remapping
      */
     public static byte[] remapClassBytes(byte[] classFile, String originNamespace, String targetNamespace, ClassMappingLookup classInfoReq) throws IOException {
-        var mappingsKey = originNamespace + "->" + targetNamespace;
+        var mappingsKey = originNamespace.concat("->").concat(targetNamespace);
         var mappingsSet = mappings.get(mappingsKey);
 
         if (mappingsSet == null) {
@@ -98,7 +98,7 @@ public class ClassFileRemapper {
                 }
 
                 case CTags.DYNAMIC, CTags.INVOKE_DYNAMIC -> {
-                    input.getShort();
+                    input.getShort(); // index into attribute
                     var ntIndex = input.getShort();
                     tracker.putMethodNT(ntIndex);
                 }
@@ -145,7 +145,7 @@ public class ClassFileRemapper {
             interfaces[interfacesCount] = utf8Copy[tracker.getClassContent(input.getShort())];
         }
 
-        // Generate fake NT structures
+        // Treat these basically as NT structures
         var fieldsCount = input.getShort();
         while (fieldsCount-- > 0) {
             input.getShort();
@@ -212,9 +212,12 @@ public class ClassFileRemapper {
                         case RemapType.SELF_FIELD_NAME ->
                             newOutput = mappingsSet.remapField(thisClass, original, utf8Copy[tracker.getDescIndex(index)]);
 
-                        case RemapType.SELF_METHOD_NAME -> {
-                            newOutput = remapSelfMethod(classInfoReq, utf8Copy, tracker, index, mappingsSet, thisClass, original, superClass, interfaces);
-                        }
+                        case RemapType.SELF_METHOD_NAME -> newOutput = remapSelfMethod(
+                                classInfoReq, utf8Copy,
+                                tracker, index,
+                                mappingsSet, thisClass,
+                                original, superClass, interfaces
+                        );
 
                         default -> {}
                     }
@@ -257,7 +260,7 @@ public class ClassFileRemapper {
         newOutput = mappingsSet.remapMethodOrNull(thisClass, original, desc);
         if (newOutput == null) {
             var superStruct = classInfoReq.lookupClassInfo(superClass);
-            var methodDesc = superStruct.getMethodsAndDesc().get(original);
+            var methodDesc = superStruct.methodsAndDesc().get(original);
             if (desc.equals(methodDesc)) {
                 newOutput = mappingsSet.remapMethod(superClass, original, desc);
             } else {
@@ -265,17 +268,17 @@ public class ClassFileRemapper {
                 // This could be arbitrarily deep in the inheritance tree, so build a queue of structs to try
                 // If a struct fails, enqueue its parents for later, this makes search breadth first
                 newOutput = original;
-                var searchQueue = new ArrayDeque<>(superStruct.getSuperAndInterfaceClasses());
+                var searchQueue = new ArrayDeque<>(superStruct.superAndInterfaceClasses());
                 searchQueue.addAll(List.of(interfaces));
                 while (!searchQueue.isEmpty()) {
                     var name = searchQueue.removeFirst();
                     var classStruct = classInfoReq.lookupClassInfo(name);
-                    methodDesc = classStruct.getMethodsAndDesc().get(original);
+                    methodDesc = classStruct.methodsAndDesc().get(original);
                     if (desc.equals(methodDesc)) {
                         newOutput = mappingsSet.remapMethod(name, original, desc);
                         break;
                     } else {
-                        searchQueue.addAll(classStruct.getSuperAndInterfaceClasses());
+                        searchQueue.addAll(classStruct.superAndInterfaceClasses());
                     }
                 }
             }

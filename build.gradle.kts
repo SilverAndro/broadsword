@@ -27,8 +27,6 @@ repositories {
 }
 
 dependencies {
-    implementation("it.unimi.dsi:fastutil-core:8.5.12")
-
     jmh("net.fabricmc:mapping-io:0.4.2")
 
     testImplementation(platform("org.junit:junit-bom:5.9.1"))

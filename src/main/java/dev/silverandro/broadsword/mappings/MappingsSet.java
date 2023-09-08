@@ -4,19 +4,18 @@
 
 package dev.silverandro.broadsword.mappings;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectAVLTreeMap;
-
+import java.util.HashMap;
 import java.util.Map;
 
 /**
  * The base class of a mappings set. Provides the ability to store and remap classes, fields, methods, modules, and packages.
  */
 public class MappingsSet {
-    protected final Map<String, String> classMapping = new Object2ObjectAVLTreeMap<>();
-    protected final Map<String, String> fieldMapping = new Object2ObjectAVLTreeMap<>();
-    protected final Map<String, String> methodMapping = new Object2ObjectAVLTreeMap<>();
-    protected final Map<String, String> moduleMapping = new Object2ObjectAVLTreeMap<>();
-    protected final Map<String, String> packageMapping = new Object2ObjectAVLTreeMap<>();
+    protected final Map<String, String> classMapping = new HashMap<>(1024, 0.7f);
+    protected final Map<String, String> fieldMapping = new HashMap<>(2048, 0.7f);
+    protected final Map<String, String> methodMapping = new HashMap<>(2048, 0.7f);
+    protected final Map<String, String> moduleMapping = new HashMap<>();
+    protected final Map<String, String> packageMapping = new HashMap<>();
 
     public final String remapClass(String current) {
         return classMapping.getOrDefault(current, current);
