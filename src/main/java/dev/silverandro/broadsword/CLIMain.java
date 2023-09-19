@@ -5,6 +5,7 @@
 package dev.silverandro.broadsword;
 
 import dev.silverandro.broadsword.mappings.EnigmaMappings;
+import dev.silverandro.broadsword.mappings.TsrgMappings;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,9 +17,14 @@ import java.util.Map;
 
 public class CLIMain {
     public static void main(String[] arg) throws IOException {
-        var mapping = new EnigmaMappings();
-        mapping.parseFromDirectory(Path.of("run/mappings"));
-        ClassFileRemapper.registerMappings("intermediary", "named", mapping);
+        var yarn = new EnigmaMappings();
+        yarn.parseFromDirectory(Path.of("run/mappings/yarn"));
+
+        var tsrg = new TsrgMappings();
+        tsrg.parseFromDirectory(Path.of("run/mappings/tsrg"));
+
+        ClassFileRemapper.registerMappings("intermediary", "named", yarn);
+        ClassFileRemapper.registerMappings("obf", "tsrg", tsrg);
 
         var open = new File("run/testclass.class");
         var output = new File("run/testoutputs/testclass.class");

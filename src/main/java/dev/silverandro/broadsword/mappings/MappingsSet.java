@@ -17,6 +17,15 @@ public class MappingsSet {
     protected final Map<String, String> moduleMapping = new HashMap<>();
     protected final Map<String, String> packageMapping = new HashMap<>();
 
+    protected boolean supportsFieldTypes() {
+        return true;
+    }
+
+    private String fieldType(String type) {
+        if (supportsFieldTypes()) return type;
+        return null;
+    }
+
     public final String remapClass(String current) {
         return classMapping.getOrDefault(current, current);
     }
@@ -26,11 +35,11 @@ public class MappingsSet {
     }
 
     public final String remapField(String parentClass, String name, String desc) {
-        return fieldMapping.getOrDefault(parentClass + "!" + name + "!" + desc, name);
+        return fieldMapping.getOrDefault(parentClass + "!" + name + "!" + fieldType(desc), name);
     }
 
     public final String remapFieldOrNull(String parentClass, String name, String desc) {
-        return fieldMapping.get(parentClass + "!" + name + "!" + desc);
+        return fieldMapping.get(parentClass + "!" + name + "!" + fieldType(desc));
     }
 
     public final String remapMethod(String parentClass, String name, String desc) {
@@ -60,19 +69,19 @@ public class MappingsSet {
         return out.toString();
     }
 
-    public final String remapModule(String current) {
+    public String remapModule(String current) {
         return moduleMapping.getOrDefault(current, current);
     }
 
-    public final String remapModuleOrNull(String current) {
+    public String remapModuleOrNull(String current) {
         return moduleMapping.get(current);
     }
 
-    public final String remapPackage(String current) {
+    public String remapPackage(String current) {
         return packageMapping.getOrDefault(current, current);
     }
 
-    public final String remapPackageOrNull(String current) {
+    public String remapPackageOrNull(String current) {
         return packageMapping.get(current);
     }
 }
