@@ -2,9 +2,10 @@ plugins {
     id("java")
     id("org.quiltmc.gradle.licenser") version "1.+"
     id("me.champeau.jmh") version "0.7.1"
+    `maven-publish`
 }
 
-group = "io.github.silverandro"
+group = "dev.silverandro"
 version = "0.0.0"
 
 java {
@@ -49,4 +50,12 @@ jmh {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("broadsword") {
+            from(components["java"])
+        }
+    }
 }
