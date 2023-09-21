@@ -5,6 +5,7 @@
 package dev.silverandro.broadsword;
 
 import dev.silverandro.broadsword.mappings.EnigmaMappings;
+import dev.silverandro.broadsword.mappings.TinyMappings;
 import dev.silverandro.broadsword.mappings.TsrgMappings;
 
 import java.io.File;
@@ -21,7 +22,10 @@ public class CLIMain {
         yarn.parseFromDirectory(Path.of("run/mappings/yarn"));
 
         var tsrg = new TsrgMappings();
-        tsrg.parseFromDirectory(Path.of("run/mappings/tsrg"));
+        tsrg.parseMappingsFile(new File("run/mappings/joined.tsrg"));
+
+        var tiny = new TinyMappings();
+        tiny.parseMappingsFile(new File("run/mappings/1.20.1.tiny"));
 
         ClassFileRemapper.registerMappings("intermediary", "named", yarn);
         ClassFileRemapper.registerMappings("obf", "tsrg", tsrg);

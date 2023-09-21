@@ -40,6 +40,10 @@ license {
     include("**/*.kt", "**/*.java")
 }
 
+java {
+    withSourcesJar()
+}
+
 jmh {
     warmupIterations.set(4)
     iterations.set(12)

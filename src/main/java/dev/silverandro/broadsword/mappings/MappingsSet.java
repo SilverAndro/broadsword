@@ -11,11 +11,11 @@ import java.util.Map;
  * The base class of a mappings set. Provides the ability to store and remap classes, fields, methods, modules, and packages.
  */
 public class MappingsSet {
-    protected final Map<String, String> classMapping = new HashMap<>(1024, 0.7f);
-    protected final Map<String, String> fieldMapping = new HashMap<>(2048, 0.7f);
-    protected final Map<String, String> methodMapping = new HashMap<>(2048, 0.7f);
-    protected final Map<String, String> moduleMapping = new HashMap<>();
-    protected final Map<String, String> packageMapping = new HashMap<>();
+    public final Map<String, String> classMapping = new HashMap<>(1024, 0.7f);
+    public final Map<String, String> fieldMapping = new HashMap<>(2048, 0.7f);
+    public final Map<String, String> methodMapping = new HashMap<>(2048, 0.7f);
+    public final Map<String, String> moduleMapping = new HashMap<>();
+    public final Map<String, String> packageMapping = new HashMap<>();
 
     protected boolean supportsFieldTypes() {
         return true;

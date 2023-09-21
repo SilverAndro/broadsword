@@ -5,11 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 
 public class TsrgMappings extends MappingsSet {
     @Override
@@ -17,19 +12,7 @@ public class TsrgMappings extends MappingsSet {
         return false;
     }
 
-    public void parseFromDirectory(Path path) throws IOException {
-        Files.walkFileTree(path, new SimpleFileVisitor<>() {
-            @Override
-            public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) {
-                if (path.getFileName().toString().endsWith(".tsrg")) {
-                    parseMappingsFile(path.toFile());
-                }
-                return FileVisitResult.CONTINUE;
-            }
-        });
-    }
-
-    private void parseMappingsFile(File file) {
+    public void parseMappingsFile(File file) {
         new FileParser().loadMappingsFile(file);
     }
 
