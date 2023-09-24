@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ClassFileRemapper {
     private static final HashMap<String, MappingsSet> mappings = new HashMap<>();
@@ -204,8 +205,6 @@ public class ClassFileRemapper {
                                 newOutput = mappingsSet.remapMethod(owner, original, desc);
                             } else if (nameType == RemapType.FIELD_NT) {
                                 newOutput = mappingsSet.remapField(owner, original, desc);
-                            } else {
-                                throw new IllegalStateException("NT structure at " + index + " has illegal name type " + nameType);
                             }
                         }
 
@@ -259,7 +258,12 @@ public class ClassFileRemapper {
         var desc = utf8Copy[tracker.getDescIndex(index)];
         newOutput = mappingsSet.remapMethodOrNull(thisClass, original, desc);
         if (newOutput == null) {
-            var superStruct = classInfoReq.lookupClassInfo(superClass);
+            ClassMappingStruct superStruct;
+            if (superClass.startsWith("java")) {
+                superStruct = new ClassMappingStruct(List.of(), Map.of());
+            } else {
+                superStruct = classInfoReq.lookupClassInfo(superClass);
+            }
             var methodDesc = superStruct.methodsAndDesc().get(original);
             if (desc.equals(methodDesc)) {
                 newOutput = mappingsSet.remapMethod(superClass, original, desc);
@@ -272,6 +276,9 @@ public class ClassFileRemapper {
                 searchQueue.addAll(List.of(interfaces));
                 while (!searchQueue.isEmpty()) {
                     var name = searchQueue.removeFirst();
+                    if (name.startsWith("java")) {
+                        continue;
+                    }
                     var classStruct = classInfoReq.lookupClassInfo(name);
                     methodDesc = classStruct.methodsAndDesc().get(original);
                     if (desc.equals(methodDesc)) {
