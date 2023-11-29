@@ -38,20 +38,25 @@ public class CLIMain {
         var open2 = new File("run/VerifyTool.class");
         var inputStream2 = new FileInputStream(open2);
         var bytes2 = inputStream2.readAllBytes();
-        ClassFileRemapper.remapClassBytes(bytes2, "intermediary", "named",
+
+        ClassFileRemapper.remapClassBytes(bytes2, yarn,
                 className -> {
                     System.out.println("Received class info request for " + className);
                     return new ClassMappingStruct(List.of(), Map.of());
                 }
         );
 
+
         var inputStream = new FileInputStream(open);
         var bytes = inputStream.readAllBytes();
         inputStream.close();
 
+        System.out.println(ClassStructExtractor.extract(bytes));
+        System.out.println(ClassStructExtractor.extract(bytes2));
+
         var resultingBytes = ClassFileRemapper.remapClassBytes(
                 bytes,
-                "intermediary", "named",
+                yarn,
                 className -> {
                     System.out.println("Received class info request for " + className);
                     return new ClassMappingStruct(List.of(), Map.of());

@@ -36,18 +36,10 @@ public class ClassFileRemapper {
      * </strong>
      *
      * @param classFile The {@code byte[]} that makes up the class file to remap
-     * @param originNamespace The origin namespace of the provided class file
-     * @param targetNamespace The namespace to remap the class into
+     * @param mappingsSet The mappings used for remapping
      * @param classInfoReq The lookup used to request information on classes necessary for remapping
      */
-    public static byte[] remapClassBytes(byte[] classFile, String originNamespace, String targetNamespace, ClassMappingLookup classInfoReq) throws IOException {
-        var mappingsKey = originNamespace.concat("->").concat(targetNamespace);
-        var mappingsSet = mappings.get(mappingsKey);
-
-        if (mappingsSet == null) {
-            throw new IllegalStateException("Cannot convert from mappings " + originNamespace + " to " + targetNamespace);
-        }
-
+    public static byte[] remapClassBytes(byte[] classFile, MappingsSet mappingsSet, ClassMappingLookup classInfoReq) throws IOException {
         var input = ByteBuffer.wrap(classFile);
 
         //  u4  magic;
