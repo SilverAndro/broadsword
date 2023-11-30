@@ -60,6 +60,28 @@ publishing {
     publications {
         create<MavenPublication>("broadsword") {
             from(components["java"])
+
+            pom {
+                name.set("Broadsword")
+                description.set("A java class file remapper with a focus on speed")
+                developers {
+                    developer {
+                        name.set("Silver")
+                        email.set("silver@silverando.dev")
+                    }
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "Silver Maven"
+            url = uri("https://maven.silverandro.dev")
+            credentials {
+                username = System.getProperty("silverMavenUsername")
+                password = System.getProperty("silverMavenPassword")
+            }
         }
     }
 }

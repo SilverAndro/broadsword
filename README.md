@@ -1,7 +1,7 @@
 # Broadsword
 
 A java class file remapper with a focus on speed, by dropping frivolous features like "parameter names", "line mappings",
- "usable signatures", and "comments".
+ "usable signatures", "annotation processing", and "comments".
 
 This library was primarily created for my projects that require remapping only at runtime or for other non-linking work,
 as such anything not critical for the class file to actually *run* in some namespace isn't processed or remapped.
