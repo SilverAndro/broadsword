@@ -27,9 +27,6 @@ public class CLIMain {
         var tiny = new TinyMappings();
         tiny.parseMappingsFile(new File("run/mappings/1.20.1.tiny"));
 
-        ClassFileRemapper.registerMappings("intermediary", "named", yarn);
-        ClassFileRemapper.registerMappings("obf", "tsrg", tsrg);
-
         var open = new File("run/testclass.class");
         var output = new File("run/testoutputs/testclass.class");
         output.getParentFile().mkdirs();
@@ -39,26 +36,26 @@ public class CLIMain {
         var inputStream2 = new FileInputStream(open2);
         var bytes2 = inputStream2.readAllBytes();
 
-        ClassFileRemapper.remapClassBytes(bytes2, yarn,
-                className -> {
-                    System.out.println("Received class info request for " + className);
-                    return new ClassMappingStruct(List.of(), Map.of());
-                }
-        );
+        int n = 100_000;
+        while (n-- > 0) {
+            ClassFileRemapper.remapClassBytes(bytes2, yarn,
+                    className -> {
+                        //System.out.println("Received class info request for " + className);
+                        return new ClassMappingStruct(List.of(), Map.of());
+                    }
+            );
+        }
 
 
         var inputStream = new FileInputStream(open);
         var bytes = inputStream.readAllBytes();
         inputStream.close();
 
-        System.out.println(ClassStructExtractor.extract(bytes));
-        System.out.println(ClassStructExtractor.extract(bytes2));
-
         var resultingBytes = ClassFileRemapper.remapClassBytes(
                 bytes,
                 yarn,
                 className -> {
-                    System.out.println("Received class info request for " + className);
+                    //System.out.println("Received class info request for " + className);
                     return new ClassMappingStruct(List.of(), Map.of());
                 }
         );

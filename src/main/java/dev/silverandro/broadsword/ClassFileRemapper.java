@@ -15,17 +15,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class ClassFileRemapper {
-    private static final HashMap<String, MappingsSet> mappings = new HashMap<>();
-
-    public static void registerMappings(String from, String to, MappingsSet mappings) {
-        ClassFileRemapper.mappings.put(from + "->" + to, mappings);
-    }
-
     /**
      * Remaps the provided class file from the origin namespace to the target namespace. When required, {@code classInfoReq}
      * is invoked to request information about classes that are needed for remapping.
@@ -176,8 +169,8 @@ public class ClassFileRemapper {
             constantPool.write(tag);
             switch (tag) {
                 case CTags.UTF8 -> {
-                    var length = input.getShort();
-                    var original = ByteBufferUtil.readBytes(length, input);
+                    var original = utf8Copy[index];
+                    ByteBufferUtil.skipBytes(input.getShort(), input);
                     String newOutput = original;
 
                     switch (tracker.getRemapType(index)) {
