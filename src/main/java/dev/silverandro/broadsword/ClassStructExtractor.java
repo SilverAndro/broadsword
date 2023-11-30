@@ -1,3 +1,7 @@
+/*
+ * Copyright 2023 SilverAndro. All Rights Reserved
+ */
+
 package dev.silverandro.broadsword;
 
 import dev.silverandro.broadsword.internal.ByteBufferUtil;

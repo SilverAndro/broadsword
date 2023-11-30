@@ -16,7 +16,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-public class CLIMain {
+class CLIMain {
     public static void main(String[] arg) throws IOException {
         var yarn = new EnigmaMappings();
         yarn.parseFromDirectory(Path.of("run/mappings/yarn"));

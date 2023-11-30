@@ -1,3 +1,7 @@
+/*
+ * Copyright 2023 SilverAndro. All Rights Reserved
+ */
+
 package dev.silverandro.broadsword.benchmark;
 
 import dev.silverandro.broadsword.ClassStructExtractor;
