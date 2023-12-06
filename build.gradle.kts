@@ -45,8 +45,8 @@ java {
 }
 
 jmh {
-    warmupIterations.set(4)
-    iterations.set(12)
+    warmupIterations.set(3)
+    iterations.set(10)
     fork.set(2)
     resultFormat.set("csv")
     resultsFile.set(project.file("${project.rootDir}/run/benchmark_results.json"))
@@ -76,7 +76,7 @@ publishing {
 
     repositories {
         maven {
-            name = "Silver Maven"
+            name = "SilverMaven"
             url = uri("https://maven.silverandro.dev")
             credentials {
                 username = System.getProperty("silverMavenUsername")

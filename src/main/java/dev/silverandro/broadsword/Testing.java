@@ -16,7 +16,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-class CLIMain {
+class Testing {
     public static void main(String[] arg) throws IOException {
         var yarn = new EnigmaMappings();
         yarn.parseFromDirectory(Path.of("run/mappings/yarn"));
@@ -36,7 +36,7 @@ class CLIMain {
         var inputStream2 = new FileInputStream(open2);
         var bytes2 = inputStream2.readAllBytes();
 
-        int n = 100_000;
+        int n = 10_000_000;
         while (n-- > 0) {
             ClassFileRemapper.remapClassBytes(bytes2, yarn,
                     className -> {
