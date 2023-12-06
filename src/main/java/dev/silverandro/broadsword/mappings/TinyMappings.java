@@ -50,9 +50,9 @@ public class TinyMappings extends MappingsSet {
             var original = split[3];
             var after = split[4];
             if (split[0].charAt(0) == 'F') {
-                fieldMapping.put(ownerClass + "!" + original + "!" + desc, after);
+                fieldMapping.put(new OwnedType(ownerClass, original, desc), after);
             } else {
-                methodMapping.put(ownerClass + "!" + original + "!" + desc, after);
+                methodMapping.put(new OwnedType(ownerClass, original, desc), after);
             }
         }
     }

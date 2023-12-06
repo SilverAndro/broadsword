@@ -55,10 +55,10 @@ public class TsrgMappings extends MappingsSet {
                 // Method
                 var thirdIndex = clean.indexOf(' ', secondIndex + 1);
                 var thirdEntry = clean.substring(secondIndex + 1, thirdIndex);
-                methodMapping.put(currentClass + "!" + firstEntry + "!" + secondEntry, thirdEntry);
+                methodMapping.put(new OwnedType(currentClass, firstEntry, secondEntry), thirdEntry);
             } else {
                 // Field
-                fieldMapping.put(currentClass + "!" + firstEntry + "!null", secondEntry);
+                methodMapping.put(new OwnedType(currentClass, firstEntry, null), secondEntry);
             }
         }
 

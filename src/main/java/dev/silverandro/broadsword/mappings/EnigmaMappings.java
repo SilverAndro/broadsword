@@ -108,7 +108,7 @@ public final class EnigmaMappings extends MappingsSet {
                     var newName = after.substring(0, splitIndex2);
                     var desc = after.substring(splitIndex2 + 1);
 
-                    fieldMapping.put(currentBeforeClass + "!" + origName + "!" + desc, newName);
+                    fieldMapping.put(new OwnedType(currentBeforeClass, origName, desc), newName);
                 }
                 return false;
             } else if (line.startsWith("METHOD")) {
@@ -126,7 +126,7 @@ public final class EnigmaMappings extends MappingsSet {
                 var newName = after.substring(0, splitIndex2);
                 var desc = after.substring(splitIndex2 + 1);
 
-                methodMapping.put(currentBeforeClass + "!" + origName + "!" + desc, newName);
+                methodMapping.put(new OwnedType(currentBeforeClass, origName, desc), newName);
                 return false;
             }  else if (line.startsWith("ARG")) {
                 return false;

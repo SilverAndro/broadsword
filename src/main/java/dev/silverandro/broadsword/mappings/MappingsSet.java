@@ -12,8 +12,8 @@ import java.util.Map;
  */
 public class MappingsSet {
     public final Map<String, String> classMapping = new HashMap<>(1024, 0.7f);
-    public final Map<String, String> fieldMapping = new HashMap<>(2048, 0.7f);
-    public final Map<String, String> methodMapping = new HashMap<>(2048, 0.7f);
+    public final Map<OwnedType, String> fieldMapping = new HashMap<>(2048, 0.7f);
+    public final Map<OwnedType, String> methodMapping = new HashMap<>(2048, 0.7f);
     public final Map<String, String> moduleMapping = new HashMap<>();
     public final Map<String, String> packageMapping = new HashMap<>();
 
@@ -35,19 +35,19 @@ public class MappingsSet {
     }
 
     public final String remapField(String parentClass, String name, String desc) {
-        return fieldMapping.getOrDefault(parentClass + "!" + name + "!" + fieldType(desc), name);
+        return fieldMapping.getOrDefault(new OwnedType(parentClass, name, fieldType(desc)), name);
     }
 
     public final String remapFieldOrNull(String parentClass, String name, String desc) {
-        return fieldMapping.get(parentClass + "!" + name + "!" + fieldType(desc));
+        return fieldMapping.get(new OwnedType(parentClass, name, fieldType(desc)));
     }
 
     public final String remapMethod(String parentClass, String name, String desc) {
-        return methodMapping.getOrDefault(parentClass + "!" + name + "!" + desc, name);
+        return methodMapping.getOrDefault(new OwnedType(parentClass, name, desc), name);
     }
 
     public final String remapMethodOrNull(String parentClass, String name, String desc) {
-        return methodMapping.get(parentClass + "!" + name + "!" + desc);
+        return methodMapping.get(new OwnedType(parentClass, name, desc));
     }
 
     public final String remapDescriptor(String current) {
@@ -84,4 +84,13 @@ public class MappingsSet {
     public String remapPackageOrNull(String current) {
         return packageMapping.get(current);
     }
+
+    /**
+     * Common type used to represent fields and methods for remapping. Generally you should use the constructor
+     * without the hash parameter.
+     * @param owner The owner class
+     * @param name The name of the type
+     * @param desc The descriptor of the type
+     */
+    public record OwnedType(String owner, String name, String desc) {}
 }
