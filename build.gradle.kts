@@ -1,7 +1,7 @@
 plugins {
     id("java")
     id("dev.yumi.gradle.licenser") version "1.+"
-    id("me.champeau.jmh") version "0.7.1"
+    id("me.champeau.jmh") version "0.7.2"
     `maven-publish`
 }
 
@@ -65,10 +65,26 @@ publishing {
             pom {
                 name.set("Broadsword")
                 description.set("A java class file remapper with a focus on speed")
+                inceptionYear.set("2023")
+                licenses {
+                    license {
+                        name.set("ARR")
+                        distribution.set("repo")
+                        comments.set("Contact Silver for licensing specifics")
+                    }
+                }
+                scm {
+                    url.set("https://github.com/SilverAndro/broadsword")
+                }
+                issueManagement {
+                    system.set("Github")
+                    url.set("https://github.com/SilverAndro/broadsword/issues")
+                }
                 developers {
                     developer {
                         name.set("Silver")
                         email.set("me@silverando.dev")
+                        url.set("silverandro.dev")
                     }
                 }
             }
