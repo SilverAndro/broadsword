@@ -6,10 +6,12 @@ package dev.silverandro.broadsword.internal;
 
 /**
  * A class that allows for tracking all the necessary information for remapping a constant pool.
- * The actual data is abstracted over with some getters and setters, but its still pretty close to minimal.
+ * The actual data is abstracted over with some getters and setters, but its still pretty close to minimal. Shouldn't fail
+ * in the case an entry is reused.
  *
- * @implNote This class is very fragile internally! For speed everything is stored int->int but that means you can put
- * the contextually wrong int into the mapping very easily, which can cause hard to debug issues.
+ * @implNote This class is very fragile internally! For speed everything is stored int->byte/short but that means you can put
+ * the contextually wrong int into the mapping very easily, which can cause hard to debug issues. Make sure to use the
+ * helper methods
  */
 public final class ConstantPoolTracker {
     private final byte[] indexToRemapType;

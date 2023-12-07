@@ -1,6 +1,6 @@
 plugins {
     id("java")
-    id("org.quiltmc.gradle.licenser") version "1.+"
+    id("dev.yumi.gradle.licenser") version "1.+"
     id("me.champeau.jmh") version "0.7.1"
     `maven-publish`
 }
@@ -28,6 +28,7 @@ repositories {
 }
 
 dependencies {
+    jmh("net.fabricmc:tiny-remapper:0.8.9")
     jmh("net.fabricmc:mapping-io:0.4.2")
 
     testImplementation(platform("org.junit:junit-bom:5.9.1"))

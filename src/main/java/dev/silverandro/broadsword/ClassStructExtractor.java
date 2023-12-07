@@ -14,9 +14,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A utility class used to extract {@link ClassMappingStruct}s from classes for remapping.
+ */
 public class ClassStructExtractor {
+    private ClassStructExtractor() {}
+
     /**
-     * Extracts a mappings struct from a class file.
+     * Extracts a mappings struct from a class file's bytes. Assumes the class file is valid.
      * @param classFile The bytes of a single class file, not modified.
      * @return A new {@link ClassMappingStruct} containing the data from the class file
      */

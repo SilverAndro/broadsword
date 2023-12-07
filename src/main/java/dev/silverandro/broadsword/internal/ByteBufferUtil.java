@@ -20,7 +20,7 @@ public final class ByteBufferUtil {
      *
      * @implNote Works by using the {@code String(byte[], int, int)}
      * constructor to copy bytes directly from the buffer with {@code arraycopy} and then just telling the ByteBuffer to
-     * skip {@code length} forward, so very cheap.
+     * skip {@code length} forward, so reasonably cheap.
      */
     public static String readBytes(int length, ByteBuffer in) {
         var out = new String(in.array(), in.position(), length, charset);
@@ -36,6 +36,9 @@ public final class ByteBufferUtil {
         in.position(in.position() + count);
     }
 
+    /**
+     * Skips {@code count} bytes forward without reading.
+     */
     public static void skipBytes(int count, ByteBuffer buffer) {
         buffer.position(buffer.position() + count);
     }

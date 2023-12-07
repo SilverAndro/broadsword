@@ -4,9 +4,11 @@
 
 package dev.silverandro.broadsword;
 
+import dev.silverandro.broadsword.mappings.MappingsSet;
+
 /**
  * A function provided to {@link ClassFileRemapper} that allows it to request a {@link ClassMappingStruct} when required.
- * See {@link ClassFileRemapper#remapClassBytes(byte[], String, String, ClassMappingLookup)} for details on the performance
+ * See {@link ClassFileRemapper#remapClassBytes(byte[], MappingsSet, ClassMappingLookup)} for details on the performance
  * implications of these requests.
  */
 @FunctionalInterface

@@ -21,7 +21,8 @@ import java.util.Map;
 public class ClassFileRemapper {
     /**
      * Remaps the provided class file from the origin namespace to the target namespace. When required, {@code classInfoReq}
-     * is invoked to request information about classes that are needed for remapping.
+     * is invoked to request information about classes that are needed for remapping. This method assumes that the class
+     * file is valid.
      * <p>
      * <strong>
      *     Please note that classInfoReq does not cache or de-duplicate requests, the invoker is in charge of the
@@ -106,8 +107,12 @@ public class ClassFileRemapper {
                 }
 
                 case CTags.METHOD_HANDLE -> {
-                    input.get();
-                    input.getShort();
+                    var kind = input.get();
+                    var refIndex = input.getShort();
+                    switch (kind) {
+                        case 1, 2, 3, 4 -> tracker.putFieldNT(refIndex);
+                        case 5, 6, 7, 8, 9 -> tracker.putMethodNT(refIndex);
+                    }
                 }
 
                 case CTags.METHOD_TYPE -> tracker.putDescriptor(input.getShort());
@@ -238,11 +243,26 @@ public class ClassFileRemapper {
         return bytes.array();
     }
 
-    private static String remapSelfMethod(ClassMappingLookup classInfoReq, String[] utf8Copy, ConstantPoolTracker tracker, int index, MappingsSet mappingsSet, String thisClass, String original, String superClass, String[] interfaces) {
-        String newOutput;
+    // Repeatedly request the class inheritance until we manage to remap or run out of structs
+    private static String remapSelfMethod(
+            ClassMappingLookup classInfoReq,
+            String[] utf8Copy,
+            ConstantPoolTracker tracker,
+            int index,
+            MappingsSet mappingsSet,
+            String thisClass,
+            String original,
+            String superClass,
+            String[] interfaces
+    ) {
+        // no one will remap <init> or <clinit>, exit early
+        if (original.startsWith("<")) { return original; }
+
+        // try just remapping straight
         var desc = utf8Copy[tracker.getDescIndex(index)];
-        newOutput = mappingsSet.remapMethodOrNull(thisClass, original, desc);
+        String newOutput = mappingsSet.remapMethodOrNull(thisClass, original, desc);
         if (newOutput == null) {
+            // Check if the super class contains it, and also prepare for if it doesnt
             ClassMappingStruct superStruct;
             if (superClass.startsWith("java")) {
                 superStruct = new ClassMappingStruct(List.of(), Map.of());
@@ -251,12 +271,11 @@ public class ClassFileRemapper {
             }
             var methodDesc = superStruct.methodsAndDesc().get(original);
             if (desc.equals(methodDesc)) {
-                newOutput = mappingsSet.remapMethod(superClass, original, desc);
+                return mappingsSet.remapMethod(superClass, original, desc);
             } else {
                 // Advanced search!
                 // This could be arbitrarily deep in the inheritance tree, so build a queue of structs to try
                 // If a struct fails, enqueue its parents for later, this makes search breadth first
-                newOutput = original;
                 var searchQueue = new ArrayDeque<>(superStruct.superAndInterfaceClasses());
                 searchQueue.addAll(List.of(interfaces));
                 while (!searchQueue.isEmpty()) {
@@ -267,8 +286,7 @@ public class ClassFileRemapper {
                     var classStruct = classInfoReq.lookupClassInfo(name);
                     methodDesc = classStruct.methodsAndDesc().get(original);
                     if (desc.equals(methodDesc)) {
-                        newOutput = mappingsSet.remapMethod(name, original, desc);
-                        break;
+                        return mappingsSet.remapMethod(name, original, desc);
                     } else {
                         searchQueue.addAll(classStruct.superAndInterfaceClasses());
                     }
@@ -282,6 +300,7 @@ public class ClassFileRemapper {
         while (count-- > 0) {
             // name index
             input.getShort();
+            // skip length of attribute
             var length = input.getInt();
             ByteBufferUtil.skipBytes(length, input);
         }

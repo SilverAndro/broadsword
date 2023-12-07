@@ -86,8 +86,7 @@ public class MappingsSet {
     }
 
     /**
-     * Common type used to represent fields and methods for remapping. Generally you should use the constructor
-     * without the hash parameter.
+     * Common type used to represent fields and methods for remapping. Whether this is a field or method is entirely contextual.
      * @param owner The owner class
      * @param name The name of the type
      * @param desc The descriptor of the type
