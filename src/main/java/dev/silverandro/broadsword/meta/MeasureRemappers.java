@@ -10,7 +10,6 @@ import net.fabricmc.tinyremapper.OutputConsumerPath;
 import net.fabricmc.tinyremapper.TinyRemapper;
 import net.fabricmc.tinyremapper.TinyUtils;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -101,8 +100,8 @@ class MeasureRemappers {
             try {
                 var newEntry = fs.getPath(className + ".class");
                 if (Files.exists(newEntry)) {
-                    InputStream stream = new BufferedInputStream(Files.newInputStream(newEntry));
-                    var res = ClassStructExtractor.extract(stream);
+                    InputStream stream = Files.newInputStream(newEntry);
+                    var res = ClassStructExtractor.extract(stream.readAllBytes());
                     stream.close();
                     return res;
                 } else {

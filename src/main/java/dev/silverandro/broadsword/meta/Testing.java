@@ -10,10 +10,7 @@ import dev.silverandro.broadsword.mappings.EnigmaMappings;
 import dev.silverandro.broadsword.mappings.TinyMappings;
 import dev.silverandro.broadsword.mappings.TsrgMappings;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +24,7 @@ class Testing {
         tsrg.parseMappingsFile(new File("run/mappings/joined.tsrg"));
 
         var tiny = new TinyMappings();
-        tiny.parseMappingsFile(new File("run/mappings/1.20.1.tiny"));
+        tiny.parseMappingsFile(new File("run/mappings/mappings.tiny"));
 
         var open = new File("run/testclass.class");
         var output = new File("run/testoutputs/testclass.class");
@@ -37,6 +34,8 @@ class Testing {
         var open2 = new File("run/VerifyTool.class");
         var inputStream2 = new FileInputStream(open2);
         var bytes2 = inputStream2.readAllBytes();
+
+        var stream2 = new ByteArrayInputStream(bytes2);
 
         int n = 10_000_000;
         while (n-- > 0) {

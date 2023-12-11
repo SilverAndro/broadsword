@@ -46,9 +46,8 @@ java {
 }
 
 jmh {
-    warmupIterations.set(3)
-    iterations.set(10)
-    fork.set(2)
+    warmupIterations.set(2)
+    iterations.set(5)
     resultFormat.set("csv")
     resultsFile.set(project.file("${project.rootDir}/run/benchmark_results.json"))
 }
