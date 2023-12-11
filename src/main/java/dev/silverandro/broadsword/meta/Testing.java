@@ -2,8 +2,10 @@
  * Copyright 2023 SilverAndro. All Rights Reserved
  */
 
-package dev.silverandro.broadsword;
+package dev.silverandro.broadsword.meta;
 
+import dev.silverandro.broadsword.ClassFileRemapper;
+import dev.silverandro.broadsword.ClassMappingStruct;
 import dev.silverandro.broadsword.mappings.EnigmaMappings;
 import dev.silverandro.broadsword.mappings.TinyMappings;
 import dev.silverandro.broadsword.mappings.TsrgMappings;

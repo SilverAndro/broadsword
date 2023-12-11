@@ -30,7 +30,7 @@ public class ClassFileRemapper {
      * </strong>
      *
      * @param classFile The {@code byte[]} that makes up the class file to remap
-     * @param mappingsSet The mappings used for remapping
+     * @param mappingsSet The mappings used for remapping.
      * @param classInfoReq The lookup used to request information on classes necessary for remapping
      */
     public static byte[] remapClassBytes(byte[] classFile, MappingsSet mappingsSet, ClassMappingLookup classInfoReq) throws IOException {
@@ -211,6 +211,7 @@ public class ClassFileRemapper {
                         default -> {}
                     }
 
+                    if (newOutput == null) { newOutput = original; }
                     constantPool.write(newOutput.length() >> 8);
                     constantPool.write(newOutput.length() & 0xFF);
                     constantPool.write(newOutput.getBytes(StandardCharsets.UTF_8));

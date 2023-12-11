@@ -1,0 +1,135 @@
+package dev.silverandro.broadsword.meta;
+
+import dev.silverandro.broadsword.ClassFileRemapper;
+import dev.silverandro.broadsword.ClassMappingLookup;
+import dev.silverandro.broadsword.ClassMappingStruct;
+import dev.silverandro.broadsword.ClassStructExtractor;
+import dev.silverandro.broadsword.mappings.TinyMappings;
+import net.fabricmc.tinyremapper.NonClassCopyMode;
+import net.fabricmc.tinyremapper.OutputConsumerPath;
+import net.fabricmc.tinyremapper.TinyRemapper;
+import net.fabricmc.tinyremapper.TinyUtils;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
+
+class MeasureRemappers {
+    static final File JAR_FILE = new File("run/jars/mc.jar");
+    static final File MAPPINGS_FILE = new File("run/mappings/tiny-huge.tiny");
+    static TinyMappings broadswordMappings;
+    static TinyRemapper tinyRemapper;
+
+    public static void main(String[] arg) throws IOException {
+        tinyRemapper = TinyRemapper.newRemapper()
+                .withMappings(TinyUtils.createTinyMappingProvider(MAPPINGS_FILE.toPath(), "official", "intermediary"))
+                .ignoreFieldDesc(false)
+                .withForcedPropagation(Collections.emptySet())
+                .propagatePrivate(false)
+                .removeFrames(false)
+                .ignoreConflicts(true)
+                .checkPackageAccess(false)
+                .fixPackageAccess(false)
+                .resolveMissing(false)
+                .rebuildSourceFilenames(false)
+                .skipLocalVariableMapping(true)
+                .renameInvalidLocals(false)
+                .threads(1)
+                .build();
+
+        broadswordMappings = new TinyMappings();
+        broadswordMappings.parseMappingsFile(MAPPINGS_FILE);
+
+        long startBr = System.currentTimeMillis();
+        broadsword();
+        long stopBr = System.currentTimeMillis();
+        System.out.println("Broadsword done! Took " + (stopBr - startBr) + "ms");
+
+        long startTR = System.currentTimeMillis();
+        tinyRemapper();
+        long stopTR = System.currentTimeMillis();
+        System.out.println("Tiny remapper done! Took " + (stopTR - startTR) + "ms");
+    }
+
+    private static void broadsword() throws IOException {
+        URI uri = URI.create("jar:file:/" + JAR_FILE.getAbsolutePath().replace('\\', '/'));
+        FileSystem fs = FileSystems.newFileSystem(uri, Collections.emptyMap());
+
+        URI outUri = URI.create("jar:file:/" + JAR_FILE.toPath().getParent().resolve("mc-br.jar").toFile().getAbsolutePath().replace('\\', '/'));
+        FileSystem outFs = FileSystems.newFileSystem(outUri, Collections.emptyMap());
+
+        var lookup = getClassMappingLookup(fs);
+
+        for (var root : fs.getRootDirectories()) {
+            Files.walkFileTree(root, new SimpleFileVisitor<>() {
+                @Override
+                public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
+                    if (path.getFileName().toString().endsWith(".class")) {
+                        InputStream inputStream = Files.newInputStream(path);
+                        byte[] classFile = inputStream.readAllBytes();
+                        inputStream.close();
+                        var resultBytes = ClassFileRemapper.remapClassBytes(classFile, broadswordMappings, lookup);
+                        Files.write(
+                                outFs.getPath(broadswordMappings.remapClass(
+                                        path.toString().replace(".class", "").substring(1)
+                                ) + ".class"),
+                                resultBytes
+                        );
+                    } else {
+                        if (Files.isRegularFile(root)) {
+                            Files.copy(root, path);
+                        }
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        }
+
+        fs.close();
+        outFs.close();
+    }
+
+    private static ClassMappingLookup getClassMappingLookup(FileSystem fs) {
+        var structs = new ConcurrentHashMap<String, ClassMappingStruct>();
+        return className -> structs.computeIfAbsent(className, s -> {
+            try {
+                var newEntry = fs.getPath(className + ".class");
+                if (Files.exists(newEntry)) {
+                    InputStream stream = new BufferedInputStream(Files.newInputStream(newEntry));
+                    var res = ClassStructExtractor.extract(stream);
+                    stream.close();
+                    return res;
+                } else {
+                    return new ClassMappingStruct(Collections.emptyList(), Collections.emptyMap());
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    private static void tinyRemapper() {
+        NonClassCopyMode ncCopyMode = NonClassCopyMode.SKIP_META_INF;
+        final Path[] classpath = new Path[]{};
+
+
+        try (OutputConsumerPath outputConsumer = new OutputConsumerPath.Builder(JAR_FILE.toPath().getParent().resolve("mc-tr.jar")).build()) {
+            outputConsumer.addNonClassFiles(JAR_FILE.toPath(), ncCopyMode, tinyRemapper);
+
+            tinyRemapper.readInputs(JAR_FILE.toPath());
+            tinyRemapper.readClassPath(classpath);
+
+            tinyRemapper.apply(outputConsumer);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            tinyRemapper.finish();
+        }
+    }
+}

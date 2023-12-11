@@ -28,7 +28,7 @@ repositories {
 }
 
 dependencies {
-    jmh("net.fabricmc:tiny-remapper:0.8.9")
+    implementation("net.fabricmc:tiny-remapper:0.8.9")
     jmh("net.fabricmc:mapping-io:0.4.2")
 
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
