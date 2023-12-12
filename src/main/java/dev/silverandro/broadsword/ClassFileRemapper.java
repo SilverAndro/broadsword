@@ -8,9 +8,12 @@ import dev.silverandro.broadsword.internal.ByteBufferUtil;
 import dev.silverandro.broadsword.internal.CTags;
 import dev.silverandro.broadsword.internal.ConstantPoolTracker;
 import dev.silverandro.broadsword.internal.RemapType;
+import dev.silverandro.broadsword.lookups.ClassMappingLookup;
+import dev.silverandro.broadsword.lookups.OutputStreamFactory;
 import dev.silverandro.broadsword.mappings.MappingsSet;
 
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -32,8 +35,9 @@ public class ClassFileRemapper {
      * @param classFile The {@code byte[]} that makes up the class file to remap
      * @param mappingsSet The mappings used for remapping.
      * @param classInfoReq The lookup used to request information on classes necessary for remapping
+     * @param outputReq Factory for an output stream based on the name of this class
      */
-    public static byte[] remapClassBytes(byte[] classFile, MappingsSet mappingsSet, ClassMappingLookup classInfoReq) throws IOException {
+    public static void remapClassBytes(byte[] classFile, MappingsSet mappingsSet, ClassMappingLookup classInfoReq, OutputStreamFactory outputReq) throws IOException {
         var input = ByteBuffer.wrap(classFile);
 
         //  u4  magic;
@@ -199,7 +203,7 @@ public class ClassFileRemapper {
                         }
 
                         case RemapType.SELF_FIELD_NAME ->
-                            newOutput = mappingsSet.remapField(thisClass, original, utf8Copy[tracker.getDescIndex(index)]);
+                                newOutput = mappingsSet.remapField(thisClass, original, utf8Copy[tracker.getDescIndex(index)]);
 
                         case RemapType.SELF_METHOD_NAME -> newOutput = remapSelfMethod(
                                 classInfoReq, utf8Copy,
@@ -236,12 +240,12 @@ public class ClassFileRemapper {
             index++;
         }
 
-        var bytes = ByteBuffer.allocate(10 + constantPool.size() + input.remaining())
-                .putLong(magic)
-                .putShort(count)
-                .put(constantPool.toByteArray())
-                .put(input);
-        return bytes.array();
+        var outputStream = new DataOutputStream(outputReq.createOutputStream(mappingsSet.remapClass(thisClass)));
+        outputStream.writeLong(magic);
+        outputStream.writeShort(count);
+        constantPool.writeTo(outputStream);
+        outputStream.write(input.array(), input.position(), input.remaining());
+        outputStream.close();
     }
 
     // Repeatedly request the class inheritance until we manage to remap or run out of structs

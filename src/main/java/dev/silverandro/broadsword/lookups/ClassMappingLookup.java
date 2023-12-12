@@ -2,13 +2,15 @@
  * Copyright 2023 SilverAndro. All Rights Reserved
  */
 
-package dev.silverandro.broadsword;
+package dev.silverandro.broadsword.lookups;
 
+import dev.silverandro.broadsword.ClassFileRemapper;
+import dev.silverandro.broadsword.ClassMappingStruct;
 import dev.silverandro.broadsword.mappings.MappingsSet;
 
 /**
  * A function provided to {@link ClassFileRemapper} that allows it to request a {@link ClassMappingStruct} when required.
- * See {@link ClassFileRemapper#remapClassBytes(byte[], MappingsSet, ClassMappingLookup)} for details on the performance
+ * See {@link ClassFileRemapper#remapClassBytes(byte[], MappingsSet, ClassMappingLookup, OutputStreamFactory)} for details on the performance
  * implications of these requests.
  */
 @FunctionalInterface

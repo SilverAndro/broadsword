@@ -1,9 +1,9 @@
 package dev.silverandro.broadsword.meta;
 
 import dev.silverandro.broadsword.ClassFileRemapper;
-import dev.silverandro.broadsword.ClassMappingLookup;
 import dev.silverandro.broadsword.ClassMappingStruct;
 import dev.silverandro.broadsword.ClassStructExtractor;
+import dev.silverandro.broadsword.lookups.ClassMappingLookup;
 import dev.silverandro.broadsword.mappings.TinyMappings;
 import net.fabricmc.tinyremapper.NonClassCopyMode;
 import net.fabricmc.tinyremapper.OutputConsumerPath;
@@ -17,6 +17,7 @@ import java.net.URI;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 class MeasureRemappers {
@@ -24,6 +25,7 @@ class MeasureRemappers {
     static final File MAPPINGS_FILE = new File("run/mappings/tiny-huge.tiny");
     static TinyMappings broadswordMappings;
     static TinyRemapper tinyRemapper;
+    static TinyRemapper tinyRemapperThreads;
 
     public static void main(String[] arg) throws IOException {
         tinyRemapper = TinyRemapper.newRemapper()
@@ -42,6 +44,22 @@ class MeasureRemappers {
                 .threads(1)
                 .build();
 
+        tinyRemapperThreads = TinyRemapper.newRemapper()
+                .withMappings(TinyUtils.createTinyMappingProvider(MAPPINGS_FILE.toPath(), "official", "intermediary"))
+                .ignoreFieldDesc(false)
+                .withForcedPropagation(Collections.emptySet())
+                .propagatePrivate(false)
+                .removeFrames(false)
+                .ignoreConflicts(true)
+                .checkPackageAccess(false)
+                .fixPackageAccess(false)
+                .resolveMissing(false)
+                .rebuildSourceFilenames(false)
+                .skipLocalVariableMapping(true)
+                .renameInvalidLocals(false)
+                .threads(8)
+                .build();
+
         broadswordMappings = new TinyMappings();
         broadswordMappings.parseMappingsFile(MAPPINGS_FILE);
 
@@ -54,6 +72,11 @@ class MeasureRemappers {
         tinyRemapper();
         long stopTR = System.currentTimeMillis();
         System.out.println("Tiny remapper done! Took " + (stopTR - startTR) + "ms");
+
+        long startTRT = System.currentTimeMillis();
+        tinyRemapperThreads();
+        long stopTRT = System.currentTimeMillis();
+        System.out.println("Tiny remapper with threads done! Took " + (stopTRT - startTRT) + "ms");
     }
 
     private static void broadsword() throws IOException {
@@ -63,7 +86,7 @@ class MeasureRemappers {
         URI outUri = URI.create("jar:file:/" + JAR_FILE.toPath().getParent().resolve("mc-br.jar").toFile().getAbsolutePath().replace('\\', '/'));
         FileSystem outFs = FileSystems.newFileSystem(outUri, Collections.emptyMap());
 
-        var lookup = getClassMappingLookup(fs);
+        var lookup = getClassMappingLookupSingle(fs);
 
         for (var root : fs.getRootDirectories()) {
             Files.walkFileTree(root, new SimpleFileVisitor<>() {
@@ -73,12 +96,12 @@ class MeasureRemappers {
                         InputStream inputStream = Files.newInputStream(path);
                         byte[] classFile = inputStream.readAllBytes();
                         inputStream.close();
-                        var resultBytes = ClassFileRemapper.remapClassBytes(classFile, broadswordMappings, lookup);
-                        Files.write(
-                                outFs.getPath(broadswordMappings.remapClass(
-                                        path.toString().replace(".class", "").substring(1)
-                                ) + ".class"),
-                                resultBytes
+
+                        ClassFileRemapper.remapClassBytes(
+                                classFile,
+                                broadswordMappings,
+                                lookup,
+                                className -> Files.newOutputStream(outFs.getPath(className+".class"))
                         );
                     } else {
                         if (Files.isRegularFile(root)) {
@@ -94,7 +117,26 @@ class MeasureRemappers {
         outFs.close();
     }
 
-    private static ClassMappingLookup getClassMappingLookup(FileSystem fs) {
+    private static ClassMappingLookup getClassMappingLookupSingle(FileSystem fs) {
+        var structs = new HashMap<String, ClassMappingStruct>();
+        return className -> structs.computeIfAbsent(className, s -> {
+            try {
+                var newEntry = fs.getPath(className + ".class");
+                if (Files.exists(newEntry)) {
+                    InputStream stream = Files.newInputStream(newEntry);
+                    var res = ClassStructExtractor.extract(stream.readAllBytes());
+                    stream.close();
+                    return res;
+                } else {
+                    return new ClassMappingStruct(Collections.emptyList(), Collections.emptyMap());
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    private static ClassMappingLookup getClassMappingLookupMulti(FileSystem fs) {
         var structs = new ConcurrentHashMap<String, ClassMappingStruct>();
         return className -> structs.computeIfAbsent(className, s -> {
             try {
@@ -129,6 +171,25 @@ class MeasureRemappers {
             throw new RuntimeException(e);
         } finally {
             tinyRemapper.finish();
+        }
+    }
+
+    private static void tinyRemapperThreads() {
+        NonClassCopyMode ncCopyMode = NonClassCopyMode.SKIP_META_INF;
+        final Path[] classpath = new Path[]{};
+
+
+        try (OutputConsumerPath outputConsumer = new OutputConsumerPath.Builder(JAR_FILE.toPath().getParent().resolve("mc-tr.jar")).build()) {
+            outputConsumer.addNonClassFiles(JAR_FILE.toPath(), ncCopyMode, tinyRemapperThreads);
+
+            tinyRemapperThreads.readInputs(JAR_FILE.toPath());
+            tinyRemapperThreads.readClassPath(classpath);
+
+            tinyRemapperThreads.apply(outputConsumer);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            tinyRemapperThreads.finish();
         }
     }
 }

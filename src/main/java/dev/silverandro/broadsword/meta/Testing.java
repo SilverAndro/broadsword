@@ -35,15 +35,13 @@ class Testing {
         var inputStream2 = new FileInputStream(open2);
         var bytes2 = inputStream2.readAllBytes();
 
-        var stream2 = new ByteArrayInputStream(bytes2);
-
         int n = 10_000_000;
         while (n-- > 0) {
-            ClassFileRemapper.remapClassBytes(bytes2, yarn,
-                    className -> {
-                        //System.out.println("Received class info request for " + className);
-                        return new ClassMappingStruct(List.of(), Map.of());
-                    }
+            ClassFileRemapper.remapClassBytes(
+                    bytes2,
+                    yarn,
+                    className -> new ClassMappingStruct(List.of(), Map.of()),
+                    className -> OutputStream.nullOutputStream()
             );
         }
 
@@ -52,17 +50,11 @@ class Testing {
         var bytes = inputStream.readAllBytes();
         inputStream.close();
 
-        var resultingBytes = ClassFileRemapper.remapClassBytes(
+        ClassFileRemapper.remapClassBytes(
                 bytes,
                 yarn,
-                className -> {
-                    //System.out.println("Received class info request for " + className);
-                    return new ClassMappingStruct(List.of(), Map.of());
-                }
+                className -> new ClassMappingStruct(List.of(), Map.of()),
+                className -> new FileOutputStream(output)
         );
-
-        var outputStream = new FileOutputStream(output);
-        outputStream.write(resultingBytes);
-        outputStream.close();
     }
 }
