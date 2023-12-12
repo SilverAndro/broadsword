@@ -51,22 +51,30 @@ public class MappingsSet {
     }
 
     public final String remapDescriptor(String current) {
-        var out = new StringBuilder(current.length());
+        int start = current.indexOf('L');
+        if (start != -1) {
+            if (current.charAt(0) == '(') {
+                var out = new StringBuilder();
+                int last = 0;
+                do {
+                    int end = current.indexOf(';', last);
+                    out.append(current, last, start);
+                    last = end + 1;
+                    out.append('L');
+                    out.append(remapClass(current.substring(start + 1, end)));
+                    out.append(';');
 
-        int i = -1;
-        while (i++ < current.length() - 1) {
-            var c = current.charAt(i);
-            if (c != 'L') {
-                out.append(c);
+                    start = current.indexOf('L', last);
+                } while (start != -1);
+
+                out.append(current, last, current.length());
+                return out.toString();
             } else {
-                var endIndex = current.indexOf(';', i+2);
-                var className = current.substring(i+1, endIndex);
-                out.append('L').append(remapClass(className)).append(';');
-                i += className.length() + 1;
+                return 'L' + remapClass(current.substring(1, current.length() - 2)) + ';';
             }
+        } else {
+            return current;
         }
-
-        return out.toString();
     }
 
     public String remapModule(String current) {

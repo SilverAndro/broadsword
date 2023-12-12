@@ -9,11 +9,11 @@ import dev.silverandro.broadsword.ClassMappingStruct;
 import dev.silverandro.broadsword.mappings.EnigmaMappings;
 import dev.silverandro.broadsword.mappings.MappingsSet;
 import org.openjdk.jmh.annotations.*;
-import org.openjdk.jmh.infra.Blackhole;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +39,12 @@ public class RemapSingleClass {
     }
 
     @Benchmark
-    public void broadsword(Blackhole bh) throws IOException {
-        bh.consume(ClassFileRemapper.remapClassBytes(classFile, mappingsSet, className -> new ClassMappingStruct(List.of(), Map.of())));
+    public void broadsword() throws IOException {
+        ClassFileRemapper.remapClassBytes(
+                classFile,
+                mappingsSet,
+                className -> new ClassMappingStruct(List.of(), Map.of()),
+                className -> OutputStream.nullOutputStream()
+        );
     }
 }
