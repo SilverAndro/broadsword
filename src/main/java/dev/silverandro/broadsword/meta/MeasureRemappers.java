@@ -11,6 +11,7 @@ import net.fabricmc.tinyremapper.TinyRemapper;
 import net.fabricmc.tinyremapper.TinyUtils;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -19,6 +20,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.zip.ZipOutputStream;
 
 class MeasureRemappers {
     static final File JAR_FILE = new File("run/jars/mc.jar");
@@ -63,6 +65,11 @@ class MeasureRemappers {
         broadswordMappings = new TinyMappings();
         broadswordMappings.parseMappingsFile(MAPPINGS_FILE);
 
+        var mcBr = JAR_FILE.toPath().getParent().resolve("mc-br.jar").toFile();
+        mcBr.createNewFile();
+        var mcBrStream = new ZipOutputStream(new FileOutputStream(mcBr));
+        mcBrStream.close();
+
         long startBr = System.currentTimeMillis();
         broadsword();
         long stopBr = System.currentTimeMillis();
@@ -101,11 +108,17 @@ class MeasureRemappers {
                                 classFile,
                                 broadswordMappings,
                                 lookup,
-                                className -> Files.newOutputStream(outFs.getPath(className+".class"))
+                                className -> {
+                                    var outFsPath = outFs.getPath(className+".class");
+                                    Files.createDirectories(outFsPath.getParent());
+                                    return Files.newOutputStream(outFsPath);
+                                }
                         );
                     } else {
-                        if (Files.isRegularFile(root)) {
-                            Files.copy(root, path);
+                        if (Files.isRegularFile(path)) {
+                            var outFsPath = outFs.getPath(path.toString());
+                            Files.createDirectories(outFsPath.getParent());
+                            Files.copy(path, outFsPath);
                         }
                     }
                     return FileVisitResult.CONTINUE;

@@ -216,9 +216,10 @@ public class ClassFileRemapper {
                     }
 
                     if (newOutput == null) { newOutput = original; }
-                    constantPool.write(newOutput.length() >> 8);
-                    constantPool.write(newOutput.length() & 0xFF);
-                    constantPool.write(newOutput.getBytes(StandardCharsets.UTF_8));
+                    var encoded = newOutput.getBytes(StandardCharsets.UTF_8);
+                    constantPool.write(encoded.length >> 8);
+                    constantPool.write(encoded.length & 0xFF);
+                    constantPool.writeBytes(encoded);
                 }
 
                 case CTags.CLASS, CTags.PACKAGE, CTags.MODULE, CTags.METHOD_TYPE, CTags.STRING ->
