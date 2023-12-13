@@ -4,16 +4,24 @@
 
 package dev.silverandro.broadsword.internal;
 
+import dev.silverandro.broadsword.UTF8Container;
+
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 /**
  * Various utility methods for working with ByteBuffers
  */
-public final class ByteBufferUtil {
-    private static final Charset charset = StandardCharsets.UTF_8;
+public final class DataUtil {
+    public static int indexOf(byte[] data, byte c, int start) {
+        int i = start;
+        while (i < data.length) {
+            if (data[i] == c) return i;
+            i++;
+        }
+        return -1;
+    }
 
     /**
      * Reads a string of length {@code length} from the byte buffer.
@@ -22,8 +30,8 @@ public final class ByteBufferUtil {
      * constructor to copy bytes directly from the buffer with {@code arraycopy} and then just telling the ByteBuffer to
      * skip {@code length} forward, so reasonably cheap.
      */
-    public static String readBytes(int length, ByteBuffer in) {
-        var out = new String(in.array(), in.position(), length, charset);
+    public static UTF8Container readBytes(int length, ByteBuffer in) {
+        var out = new UTF8Container(Arrays.copyOfRange(in.array(), in.position(), in.position() + length));
         in.position(in.position() + length);
         return out;
     }

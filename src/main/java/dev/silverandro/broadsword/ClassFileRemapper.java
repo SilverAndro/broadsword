@@ -4,9 +4,9 @@
 
 package dev.silverandro.broadsword;
 
-import dev.silverandro.broadsword.internal.ByteBufferUtil;
 import dev.silverandro.broadsword.internal.CTags;
 import dev.silverandro.broadsword.internal.ConstantPoolTracker;
+import dev.silverandro.broadsword.internal.DataUtil;
 import dev.silverandro.broadsword.internal.RemapType;
 import dev.silverandro.broadsword.lookups.ClassMappingLookup;
 import dev.silverandro.broadsword.lookups.OutputStreamFactory;
@@ -16,7 +16,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Map;
@@ -53,9 +52,9 @@ public class ClassFileRemapper {
         input.mark();
 
         // To be populated later, lets us remap field and method attr
-        String thisClass;
+        UTF8Container thisClass;
         // Copy all UFT-8 data into memory to assist in remapping
-        var utf8Copy = new String[count];
+        var utf8Copy = new UTF8Container[count];
         // Keep track of info
         var tracker = new ConstantPoolTracker(count);
 
@@ -65,7 +64,7 @@ public class ClassFileRemapper {
             switch (tag) {
                 case CTags.UTF8 -> {
                     var length = input.getShort();
-                    var content = ByteBufferUtil.readBytes(length, input);
+                    var content = DataUtil.readBytes(length, input);
                     utf8Copy[index] = content;
                 }
 
@@ -135,7 +134,7 @@ public class ClassFileRemapper {
         thisClass = utf8Copy[tracker.getClassContent(input.getShort())];
         var superClass = utf8Copy[tracker.getClassContent(input.getShort())];
         var interfacesCount = input.getShort();
-        var interfaces = new String[interfacesCount];
+        var interfaces = new UTF8Container[interfacesCount];
         while (interfacesCount-- > 0) {
             interfaces[interfacesCount] = utf8Copy[tracker.getClassContent(input.getShort())];
         }
@@ -179,8 +178,8 @@ public class ClassFileRemapper {
             switch (tag) {
                 case CTags.UTF8 -> {
                     var original = utf8Copy[index];
-                    ByteBufferUtil.skipBytes(input.getShort(), input);
-                    String newOutput = original;
+                    DataUtil.skipBytes(input.getShort(), input);
+                    UTF8Container newOutput = original;
 
                     switch (tracker.getRemapType(index)) {
                         case RemapType.CLASS -> newOutput = mappingsSet.remapClass(original);
@@ -216,25 +215,25 @@ public class ClassFileRemapper {
                     }
 
                     if (newOutput == null) { newOutput = original; }
-                    var encoded = newOutput.getBytes(StandardCharsets.UTF_8);
-                    constantPool.write(encoded.length >> 8);
-                    constantPool.write(encoded.length & 0xFF);
-                    constantPool.writeBytes(encoded);
+                    var data = newOutput.getData();
+                    constantPool.write(data.length >> 8);
+                    constantPool.write((byte)data.length);
+                    constantPool.writeBytes(data);
                 }
 
                 case CTags.CLASS, CTags.PACKAGE, CTags.MODULE, CTags.METHOD_TYPE, CTags.STRING ->
-                        ByteBufferUtil.copyBytes(2, input, constantPool);
+                        DataUtil.copyBytes(2, input, constantPool);
 
                 case CTags.FIELD, CTags.METHOD, CTags.INTERFACE_METHOD,
                         CTags.NAME_AND_TYPE, CTags.DYNAMIC, CTags.INVOKE_DYNAMIC,
-                        CTags.INTEGER, CTags.FLOAT -> ByteBufferUtil.copyBytes(4, input, constantPool);
+                        CTags.INTEGER, CTags.FLOAT -> DataUtil.copyBytes(4, input, constantPool);
 
                 case CTags.LONG, CTags.DOUBLE -> {
-                    ByteBufferUtil.copyBytes(8, input, constantPool);
+                    DataUtil.copyBytes(8, input, constantPool);
                     index++;
                 }
 
-                case CTags.METHOD_HANDLE -> ByteBufferUtil.copyBytes(3, input, constantPool);
+                case CTags.METHOD_HANDLE -> DataUtil.copyBytes(3, input, constantPool);
 
                 default -> throw new IllegalStateException("Got out of sync? Unexpected constant pool tag " + tag + " in rewrite phase.");
             }
@@ -250,27 +249,27 @@ public class ClassFileRemapper {
     }
 
     // Repeatedly request the class inheritance until we manage to remap or run out of structs
-    private static String remapSelfMethod(
+    private static UTF8Container remapSelfMethod(
             ClassMappingLookup classInfoReq,
-            String[] utf8Copy,
+            UTF8Container[] utf8Copy,
             ConstantPoolTracker tracker,
             int index,
             MappingsSet mappingsSet,
-            String thisClass,
-            String original,
-            String superClass,
-            String[] interfaces
+            UTF8Container thisClass,
+            UTF8Container original,
+            UTF8Container superClass,
+            UTF8Container[] interfaces
     ) {
         // no one will remap <init> or <clinit>, exit early
-        if (original.startsWith("<")) { return original; }
+        if (original.startsWith('<')) { return original; }
 
         // try just remapping straight
         var desc = utf8Copy[tracker.getDescIndex(index)];
-        String newOutput = mappingsSet.remapMethodOrNull(thisClass, original, desc);
+        UTF8Container newOutput = mappingsSet.remapMethodOrNull(thisClass, original, desc);
         if (newOutput == null) {
             // Check if the super class contains it, and also prepare for if it doesnt
             ClassMappingStruct superStruct;
-            if (superClass.startsWith("java")) {
+            if (superClass.startsWithJava()) {
                 superStruct = new ClassMappingStruct(List.of(), Map.of());
             } else {
                 superStruct = classInfoReq.lookupClassInfo(superClass);
@@ -286,7 +285,7 @@ public class ClassFileRemapper {
                 searchQueue.addAll(List.of(interfaces));
                 while (!searchQueue.isEmpty()) {
                     var name = searchQueue.removeFirst();
-                    if (name.startsWith("java")) {
+                    if (name.startsWithJava()) {
                         continue;
                     }
                     var classStruct = classInfoReq.lookupClassInfo(name);
@@ -308,7 +307,7 @@ public class ClassFileRemapper {
             input.getShort();
             // skip length of attribute
             var length = input.getInt();
-            ByteBufferUtil.skipBytes(length, input);
+            DataUtil.skipBytes(length, input);
         }
     }
 }

@@ -4,9 +4,9 @@
 
 package dev.silverandro.broadsword;
 
-import dev.silverandro.broadsword.internal.ByteBufferUtil;
 import dev.silverandro.broadsword.internal.CTags;
 import dev.silverandro.broadsword.internal.ConstantPoolTracker;
+import dev.silverandro.broadsword.internal.DataUtil;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -26,8 +26,8 @@ public class ClassStructExtractor {
      * @return A new {@link ClassMappingStruct} containing the data from the class file
      */
     public static ClassMappingStruct extract(byte[] classFile) {
-        List<String> superAndInterfaceClasses = new ArrayList<>();
-        Map<String, String> methodsAndDesc = new HashMap<>();
+        List<UTF8Container> superAndInterfaceClasses = new ArrayList<>();
+        Map<UTF8Container, UTF8Container> methodsAndDesc = new HashMap<>();
 
         var input = ByteBuffer.wrap(classFile);
         input.getLong();
@@ -36,7 +36,7 @@ public class ClassStructExtractor {
         var index = 1;
 
         // Copy all UFT-8 data into memory to assist in remapping
-        var utf8Copy = new String[count];
+        var utf8Copy = new UTF8Container[count];
         // Keep track of info
         var tracker = new ConstantPoolTracker(count);
 
@@ -45,7 +45,7 @@ public class ClassStructExtractor {
             switch (tag) {
                 case CTags.UTF8 -> {
                     var length = input.getShort();
-                    var content = ByteBufferUtil.readBytes(length, input);
+                    var content = DataUtil.readBytes(length, input);
                     utf8Copy[index] = content;
                 }
 
@@ -76,7 +76,7 @@ public class ClassStructExtractor {
         input.getInt();
         var superIndex = input.getShort();
         if (superIndex == 0) {
-            superAndInterfaceClasses.add("java/lang/Object");
+            superAndInterfaceClasses.add(new UTF8Container("java/lang/Object"));
         } else {
             superAndInterfaceClasses.add(utf8Copy[tracker.getClassContent(superIndex)]);
         }
@@ -88,7 +88,7 @@ public class ClassStructExtractor {
         // Treat these basically as NT structures
         var fieldsCount = input.getShort();
         while (fieldsCount-- > 0) {
-            ByteBufferUtil.skipBytes(6, input);
+            DataUtil.skipBytes(6, input);
             var attrCount = input.getShort();
             eatAttributes(attrCount, input);
         }
@@ -111,7 +111,7 @@ public class ClassStructExtractor {
         while (count-- > 0) {
             input.getShort();
             var length = input.getInt();
-            ByteBufferUtil.skipBytes(length, input);
+            DataUtil.skipBytes(length, input);
         }
     }
 }

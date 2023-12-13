@@ -4,6 +4,8 @@
 
 package dev.silverandro.broadsword.mappings;
 
+import dev.silverandro.broadsword.UTF8Container;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -55,10 +57,10 @@ public class TsrgMappings extends MappingsSet {
                 // Method
                 var thirdIndex = clean.indexOf(' ', secondIndex + 1);
                 var thirdEntry = clean.substring(secondIndex + 1, thirdIndex);
-                methodMapping.put(new OwnedType(currentClass, firstEntry, secondEntry), thirdEntry);
+                methodMapping.put(OwnedType.of(currentClass, firstEntry, secondEntry), new UTF8Container(thirdEntry));
             } else {
                 // Field
-                methodMapping.put(new OwnedType(currentClass, firstEntry, null), secondEntry);
+                methodMapping.put(OwnedType.of(currentClass, firstEntry, null), new UTF8Container(secondEntry));
             }
         }
 
@@ -66,7 +68,7 @@ public class TsrgMappings extends MappingsSet {
             var firstIndex = clean.indexOf(' ');
             var secondIndex = clean.indexOf(' ', firstIndex + 1);
             currentClass = clean.substring(0, firstIndex);
-            classMapping.put(currentClass, clean.substring(firstIndex + 1, secondIndex));
+            classMapping.put(new UTF8Container(currentClass), new UTF8Container(clean.substring(firstIndex + 1, secondIndex)));
         }
     }
 }

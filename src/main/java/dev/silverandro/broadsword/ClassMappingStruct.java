@@ -11,6 +11,6 @@ import java.util.Map;
  * Represents a class, used for class data lookup during remapping. Consider use of {@link ClassStructExtractor} for highly
  * efficient creation of these structs and their data.
  */
-public record ClassMappingStruct(List<String> superAndInterfaceClasses, Map<String, String> methodsAndDesc) {
+public record ClassMappingStruct(List<UTF8Container> superAndInterfaceClasses, Map<UTF8Container, UTF8Container> methodsAndDesc) {
 
 }

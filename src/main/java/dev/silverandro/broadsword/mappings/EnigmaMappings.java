@@ -4,6 +4,8 @@
 
 package dev.silverandro.broadsword.mappings;
 
+import dev.silverandro.broadsword.UTF8Container;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -93,7 +95,7 @@ public final class EnigmaMappings extends MappingsSet {
 
                 currentBeforeClass = before;
                 currentAfterClass = after;
-                classMapping.put(before, after);
+                classMapping.put(new UTF8Container(before), new UTF8Container(after));
                 return true;
             } else if (line.startsWith("FIELD")) {
                 var splice = line.substring("FIELD ".length());
@@ -108,7 +110,7 @@ public final class EnigmaMappings extends MappingsSet {
                     var newName = after.substring(0, splitIndex2);
                     var desc = after.substring(splitIndex2 + 1);
 
-                    fieldMapping.put(new OwnedType(currentBeforeClass, origName, desc), newName);
+                    fieldMapping.put(OwnedType.of(currentBeforeClass, origName, desc), new UTF8Container(newName));
                 }
                 return false;
             } else if (line.startsWith("METHOD")) {
@@ -126,7 +128,7 @@ public final class EnigmaMappings extends MappingsSet {
                 var newName = after.substring(0, splitIndex2);
                 var desc = after.substring(splitIndex2 + 1);
 
-                methodMapping.put(new OwnedType(currentBeforeClass, origName, desc), newName);
+                methodMapping.put(OwnedType.of(currentBeforeClass, origName, desc), new UTF8Container(newName));
                 return false;
             }  else if (line.startsWith("ARG")) {
                 return false;

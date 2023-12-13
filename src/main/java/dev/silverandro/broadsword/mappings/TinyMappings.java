@@ -4,6 +4,8 @@
 
 package dev.silverandro.broadsword.mappings;
 
+import dev.silverandro.broadsword.UTF8Container;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -40,7 +42,7 @@ public class TinyMappings extends MappingsSet {
             int splitIndex = line.indexOf('\t', startIndex);
             String original = line.substring(startIndex, splitIndex);
             String after = line.substring(splitIndex + 1);
-            classMapping.put(original, after);
+            classMapping.put(new UTF8Container(original), new UTF8Container(after));
         }
 
         private void readFieldOrMethodLine(String line) {
@@ -50,9 +52,9 @@ public class TinyMappings extends MappingsSet {
             var original = split[3];
             var after = split[4];
             if (split[0].charAt(0) == 'F') {
-                fieldMapping.put(new OwnedType(ownerClass, original, desc), after);
+                fieldMapping.put(OwnedType.of(ownerClass, original, desc), new UTF8Container(after));
             } else {
-                methodMapping.put(new OwnedType(ownerClass, original, desc), after);
+                methodMapping.put(OwnedType.of(ownerClass, original, desc), new UTF8Container(after));
             }
         }
     }
