@@ -13,6 +13,8 @@ public final class UTF8Container {
     private int hash;
     private boolean hashIsZero;
 
+    private static final byte[] JAVA = new byte[] {'j', 'a', 'v', 'a'};
+
     public UTF8Container(byte[] data) {
         this.data = data;
     }
@@ -39,7 +41,7 @@ public final class UTF8Container {
     public int hashCode() {
         int h = hash;
         if (h == 0 && !hashIsZero) {
-            h = hash(data);
+            h = Arrays.hashCode(data);
             if (h == 0) {
                 hashIsZero = true;
             } else {
@@ -49,19 +51,11 @@ public final class UTF8Container {
         return h;
     }
 
-    private static int hash(byte[] data) {
-        int h = 0;
-        for (byte v : data) {
-            h = 31 * h + (v & 0xff);
-        }
-        return h;
-    }
-
     public boolean startsWith(char c) {
         return data[0] == c;
     }
 
     boolean startsWithJava() {
-        return data[0] == 'j' && data[1] == 'a' && data[2] == 'v' && data[3] == 'a';
+        return Arrays.mismatch(data, JAVA) < 0;
     }
 }
