@@ -1,3 +1,7 @@
+/*
+ * Copyright 2023 SilverAndro. All Rights Reserved
+ */
+
 package dev.silverandro.broadsword.lookups;
 
 import dev.silverandro.broadsword.ClassFileRemapper;
