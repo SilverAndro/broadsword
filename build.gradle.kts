@@ -1,3 +1,6 @@
+import groovy.util.Node
+import groovy.util.NodeList
+
 plugins {
     id("java")
     id("dev.yumi.gradle.licenser") version "1.+"
@@ -6,7 +9,7 @@ plugins {
 }
 
 group = "dev.silverandro"
-version = "0.1.2"
+version = "0.1.3"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
@@ -88,6 +91,12 @@ publishing {
                     }
                 }
             }
+            pom.withXml {
+                val n = asNode()
+                (n.get("dependencies") as NodeList).forEach {
+                    n.remove(it as Node)
+                }
+            }
         }
     }
 
@@ -101,4 +110,8 @@ publishing {
             }
         }
     }
+}
+
+tasks.withType<GenerateModuleMetadata> {
+    enabled = false
 }
