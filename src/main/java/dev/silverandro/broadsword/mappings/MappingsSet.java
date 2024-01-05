@@ -69,7 +69,7 @@ public class MappingsSet {
                 var remapped = remapClass(new UTF8Container(Arrays.copyOfRange(currentData, i + 1, end))).getData();
                 output.write(remapped);
                 output.write(';');
-                i += remapped.length + 1;
+                i += end - i;
             }
         }
 
