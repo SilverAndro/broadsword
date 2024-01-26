@@ -4,7 +4,7 @@
 
 package dev.silverandro.broadsword.internal;
 
-import dev.silverandro.broadsword.ClassFileRemapper;
+import dev.silverandro.broadsword.tools.ClassFileRemapper;
 
 /**
  * Internal IDs used in {@link ConstantPoolTracker} and {@link ClassFileRemapper} to make sure they're referring to the

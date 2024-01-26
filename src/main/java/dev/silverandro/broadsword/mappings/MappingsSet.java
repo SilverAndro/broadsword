@@ -4,8 +4,8 @@
 
 package dev.silverandro.broadsword.mappings;
 
-import dev.silverandro.broadsword.UTF8Container;
 import dev.silverandro.broadsword.internal.DataUtil;
+import dev.silverandro.broadsword.tools.UTF8Container;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -69,7 +69,7 @@ public class MappingsSet {
                 var remapped = remapClass(new UTF8Container(Arrays.copyOfRange(currentData, i + 1, end))).getData();
                 output.write(remapped);
                 output.write(';');
-                i += end - i;
+                i = end;
             }
         }
 

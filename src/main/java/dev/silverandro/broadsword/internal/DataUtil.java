@@ -4,7 +4,7 @@
 
 package dev.silverandro.broadsword.internal;
 
-import dev.silverandro.broadsword.UTF8Container;
+import dev.silverandro.broadsword.tools.UTF8Container;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;

@@ -4,12 +4,12 @@
 
 package dev.silverandro.broadsword.meta;
 
-import dev.silverandro.broadsword.ClassFileRemapper;
 import dev.silverandro.broadsword.ClassMappingStruct;
-import dev.silverandro.broadsword.ClassStructExtractor;
-import dev.silverandro.broadsword.UTF8Container;
 import dev.silverandro.broadsword.lookups.ClassMappingLookup;
 import dev.silverandro.broadsword.mappings.TinyMappings;
+import dev.silverandro.broadsword.tools.ClassFileRemapper;
+import dev.silverandro.broadsword.tools.ClassStructExtractor;
+import dev.silverandro.broadsword.tools.UTF8Container;
 import net.fabricmc.tinyremapper.NonClassCopyMode;
 import net.fabricmc.tinyremapper.OutputConsumerPath;
 import net.fabricmc.tinyremapper.TinyRemapper;

@@ -4,10 +4,10 @@
 
 package dev.silverandro.broadsword.lookups;
 
-import dev.silverandro.broadsword.ClassFileRemapper;
 import dev.silverandro.broadsword.ClassMappingStruct;
-import dev.silverandro.broadsword.UTF8Container;
 import dev.silverandro.broadsword.mappings.MappingsSet;
+import dev.silverandro.broadsword.tools.ClassFileRemapper;
+import dev.silverandro.broadsword.tools.UTF8Container;
 
 /**
  * A function provided to {@link ClassFileRemapper} that allows it to request a {@link ClassMappingStruct} when required.

@@ -2,7 +2,7 @@
  * Copyright 2023 SilverAndro. All Rights Reserved
  */
 
-package dev.silverandro.broadsword;
+package dev.silverandro.broadsword.tools;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;

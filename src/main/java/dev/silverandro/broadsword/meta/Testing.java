@@ -4,11 +4,11 @@
 
 package dev.silverandro.broadsword.meta;
 
-import dev.silverandro.broadsword.ClassFileRemapper;
 import dev.silverandro.broadsword.ClassMappingStruct;
 import dev.silverandro.broadsword.mappings.EnigmaMappings;
 import dev.silverandro.broadsword.mappings.TinyMappings;
 import dev.silverandro.broadsword.mappings.TsrgMappings;
+import dev.silverandro.broadsword.tools.ClassFileRemapper;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -26,8 +26,8 @@ class Testing {
         var tiny = new TinyMappings();
         tiny.parseMappingsFile(new File("run/mappings/mappings.tiny"));
 
-        var open = new File("run/testclass.class");
-        var output = new File("run/testoutputs/testclass.class");
+        var open = new File("run/o.class");
+        var output = new File("run/testoutputs/o.class");
         output.getParentFile().mkdirs();
         output.createNewFile();
 

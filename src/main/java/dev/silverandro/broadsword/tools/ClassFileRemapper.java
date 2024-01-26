@@ -2,8 +2,9 @@
  * Copyright 2023 SilverAndro. All Rights Reserved
  */
 
-package dev.silverandro.broadsword;
+package dev.silverandro.broadsword.tools;
 
+import dev.silverandro.broadsword.ClassMappingStruct;
 import dev.silverandro.broadsword.internal.CTags;
 import dev.silverandro.broadsword.internal.ConstantPoolTracker;
 import dev.silverandro.broadsword.internal.DataUtil;

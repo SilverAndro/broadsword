@@ -4,10 +4,10 @@
 
 package dev.silverandro.broadsword.benchmark;
 
-import dev.silverandro.broadsword.ClassFileRemapper;
 import dev.silverandro.broadsword.ClassMappingStruct;
 import dev.silverandro.broadsword.mappings.EnigmaMappings;
 import dev.silverandro.broadsword.mappings.MappingsSet;
+import dev.silverandro.broadsword.tools.ClassFileRemapper;
 import org.openjdk.jmh.annotations.*;
 
 import java.io.File;

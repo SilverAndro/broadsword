@@ -19,11 +19,13 @@ public final class ConstantPoolTracker {
     private final short[] ntData;
     // Works as both Class->UTF8Content and Name->Desc
     private final short[] contentMappings;
+    final int size;
 
-    public ConstantPoolTracker(int upperBound) {
-        indexToRemapType = new byte[upperBound];
-        ntData = new short[upperBound];
-        contentMappings = new short[upperBound];
+    public ConstantPoolTracker(int size) {
+        indexToRemapType = new byte[size];
+        ntData = new short[size];
+        contentMappings = new short[size];
+        this.size = size;
     }
 
     //

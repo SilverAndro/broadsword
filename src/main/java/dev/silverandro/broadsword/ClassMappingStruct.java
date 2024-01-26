@@ -4,6 +4,9 @@
 
 package dev.silverandro.broadsword;
 
+import dev.silverandro.broadsword.tools.ClassStructExtractor;
+import dev.silverandro.broadsword.tools.UTF8Container;
+
 import java.util.List;
 import java.util.Map;
 

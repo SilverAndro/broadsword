@@ -4,7 +4,7 @@
 
 package dev.silverandro.broadsword.benchmark;
 
-import dev.silverandro.broadsword.ClassStructExtractor;
+import dev.silverandro.broadsword.tools.ClassStructExtractor;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 

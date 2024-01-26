@@ -4,7 +4,7 @@
 
 package dev.silverandro.broadsword.mappings;
 
-import dev.silverandro.broadsword.UTF8Container;
+import dev.silverandro.broadsword.tools.UTF8Container;
 
 import java.io.BufferedReader;
 import java.io.File;

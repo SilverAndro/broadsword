@@ -1,13 +1,10 @@
 # Broadsword
 
-A java class file remapper with a focus on speed, by dropping frivolous features like "parameter names", "line mappings",
- "usable signatures", "annotation processing", and "comments".
+A java class file remapper with a focus on speed by working directly with class bytes rather than multiple abstraction
+layers such as with ow2-asm.
 
-This library was primarily created for my projects that require remapping only at runtime or for other non-linking work,
-as such anything not critical for the class file to actually *run* in some namespace isn't processed or remapped.
-
-This library definitely has edgecases, but for the majority of code, it shouldnt be an issue.
-
+This library was primarily created for my own projects, with implicit requirements. As such, there is some data that may
+be ignored or malformed, as it is not relevant to my work.
 ### How does it work
 Rather than using ASM to read the class file, and then using a visitor to visit every possible node to remap
 it if necessary, broadsword instead works directly on the constant pool. Since everything in a java class file
@@ -69,9 +66,3 @@ public class RemapClassFile {
     }
 }
 ```
-
-### Theory/self notes
-
-- might be possible to remap the constant pool without back tracking over it? have to solve case where typing info is at
-the end of the table essentially holding everything up
-- if packing jar level utils, how should class paths be handled?

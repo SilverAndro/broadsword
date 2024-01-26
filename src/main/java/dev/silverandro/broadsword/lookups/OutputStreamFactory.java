@@ -4,8 +4,8 @@
 
 package dev.silverandro.broadsword.lookups;
 
-import dev.silverandro.broadsword.ClassFileRemapper;
-import dev.silverandro.broadsword.UTF8Container;
+import dev.silverandro.broadsword.tools.ClassFileRemapper;
+import dev.silverandro.broadsword.tools.UTF8Container;
 
 import java.io.IOException;
 import java.io.OutputStream;
