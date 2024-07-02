@@ -31,11 +31,7 @@ public final class DataUtil {
     }
 
     /**
-     * Reads a string of length {@code length} from the byte buffer.
-     *
-     * @implNote Works by using the {@code String(byte[], int, int)}
-     * constructor to copy bytes directly from the buffer with {@code arraycopy} and then just telling the ByteBuffer to
-     * skip {@code length} forward, so reasonably cheap.
+     * Reads a UTF8 string of length {@code length} from the byte buffer.
      */
     public static UTF8Container readBytes(int length, ByteBuffer in) {
         var out = new UTF8Container(Arrays.copyOfRange(in.array(), in.position(), in.position() + length));
