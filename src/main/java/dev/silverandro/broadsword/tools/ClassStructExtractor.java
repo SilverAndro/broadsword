@@ -6,7 +6,6 @@ package dev.silverandro.broadsword.tools;
 
 import dev.silverandro.broadsword.ClassMappingStruct;
 import dev.silverandro.broadsword.meta.CTags;
-import dev.silverandro.broadsword.meta.ConstantPoolTracker;
 import dev.silverandro.broadsword.meta.DataUtil;
 
 import java.nio.ByteBuffer;
@@ -38,8 +37,8 @@ public class ClassStructExtractor {
 
         // Copy all UFT-8 data into memory to assist in remapping
         var utf8Copy = new UTF8Container[count];
-        // Keep track of info
-        var tracker = new ConstantPoolTracker(count);
+        // track where each class points
+        var classData = new short[count];
 
         while (index < count) {
             var tag = input.get();
@@ -52,7 +51,7 @@ public class ClassStructExtractor {
 
                 case CTags.CLASS -> {
                     var contentIndex = input.getShort();
-                    tracker.putClass(index, contentIndex);
+                    classData[index] = contentIndex;
                 }
 
                 case CTags.FIELD, CTags.INTEGER, CTags.FLOAT, CTags.METHOD, CTags.INTERFACE_METHOD, CTags.NAME_AND_TYPE, CTags.DYNAMIC, CTags.INVOKE_DYNAMIC -> input.getInt();
@@ -79,11 +78,11 @@ public class ClassStructExtractor {
         if (superIndex == 0) {
             superAndInterfaceClasses.add(new UTF8Container("java/lang/Object"));
         } else {
-            superAndInterfaceClasses.add(utf8Copy[tracker.getClassContent(superIndex)]);
+            superAndInterfaceClasses.add(utf8Copy[classData[superIndex]]);
         }
         var interfacesCount = input.getShort();
         while (interfacesCount-- > 0) {
-            superAndInterfaceClasses.add(utf8Copy[tracker.getClassContent(input.getShort())]);
+            superAndInterfaceClasses.add(utf8Copy[classData[input.getShort()]]);
         }
 
         // Treat these basically as NT structures

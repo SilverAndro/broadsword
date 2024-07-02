@@ -12,7 +12,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-public class TsrgMappings extends MappingsSet {
+public final class TsrgMappings extends MappingsSet {
     @Override
     protected boolean supportsFieldTypes() {
         return false;

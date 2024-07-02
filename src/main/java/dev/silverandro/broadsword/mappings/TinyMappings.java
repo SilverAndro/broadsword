@@ -12,7 +12,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-public class TinyMappings extends MappingsSet {
+public final class TinyMappings extends MappingsSet {
     public void parseMappingsFile(File file) {
         new FileParser().loadMappingsFile(file);
     }
