@@ -2,7 +2,7 @@
  * Copyright 2023 SilverAndro. All Rights Reserved
  */
 
-package dev.silverandro.broadsword;
+package dev.silverandro.broadsword.data;
 
 import dev.silverandro.broadsword.tools.ClassStructExtractor;
 import dev.silverandro.broadsword.tools.UTF8Container;

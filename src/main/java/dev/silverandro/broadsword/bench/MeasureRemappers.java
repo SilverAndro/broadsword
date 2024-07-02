@@ -4,7 +4,7 @@
 
 package dev.silverandro.broadsword.bench;
 
-import dev.silverandro.broadsword.ClassMappingStruct;
+import dev.silverandro.broadsword.data.ClassMappingStruct;
 import dev.silverandro.broadsword.lookups.ClassMappingLookup;
 import dev.silverandro.broadsword.mappings.TinyMappings;
 import dev.silverandro.broadsword.tools.ClassFileRemapper;

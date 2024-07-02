@@ -4,7 +4,7 @@
 
 package dev.silverandro.broadsword.lookups;
 
-import dev.silverandro.broadsword.ClassMappingStruct;
+import dev.silverandro.broadsword.data.ClassMappingStruct;
 import dev.silverandro.broadsword.mappings.MappingsSet;
 import dev.silverandro.broadsword.tools.ClassFileRemapper;
 import dev.silverandro.broadsword.tools.UTF8Container;
