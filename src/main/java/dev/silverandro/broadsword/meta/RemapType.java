@@ -2,7 +2,7 @@
  * Copyright 2023 SilverAndro. All Rights Reserved
  */
 
-package dev.silverandro.broadsword.internal;
+package dev.silverandro.broadsword.meta;
 
 import dev.silverandro.broadsword.tools.ClassFileRemapper;
 

@@ -2,7 +2,7 @@
  * Copyright 2023 SilverAndro. All Rights Reserved
  */
 
-package dev.silverandro.broadsword.internal;
+package dev.silverandro.broadsword.meta;
 
 /**
  * A class that allows for tracking all the necessary information for remapping a constant pool.
@@ -19,13 +19,11 @@ public final class ConstantPoolTracker {
     private final short[] ntData;
     // Works as both Class->UTF8Content and Name->Desc
     private final short[] contentMappings;
-    final int size;
 
     public ConstantPoolTracker(int size) {
         indexToRemapType = new byte[size];
         ntData = new short[size];
         contentMappings = new short[size];
-        this.size = size;
     }
 
     //
@@ -99,6 +97,7 @@ public final class ConstantPoolTracker {
         return ntData[nameIndex];
     }
 
+    // TODO: change this to be from the name directly
     public int getNameOwner(int nameIndex) {
         return ntData[getNameNT(nameIndex)];
     }

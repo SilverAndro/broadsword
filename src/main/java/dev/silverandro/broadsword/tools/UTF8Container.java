@@ -62,4 +62,15 @@ public final class UTF8Container {
     boolean startsWithJava() {
         return Arrays.mismatch(data, JAVA) < 0;
     }
+
+    public int length() {
+        return data.length;
+    }
+
+    public UTF8Container append(UTF8Container o) {
+        byte[] out = new byte[length() + o.length()];
+        System.arraycopy(data, 0, out, 0, length());
+        System.arraycopy(o.data, 0, out, length() + 1, o.length());
+        return new UTF8Container(out);
+    }
 }

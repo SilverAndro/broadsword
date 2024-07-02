@@ -5,13 +5,13 @@
 package dev.silverandro.broadsword.tools;
 
 import dev.silverandro.broadsword.ClassMappingStruct;
-import dev.silverandro.broadsword.internal.CTags;
-import dev.silverandro.broadsword.internal.ConstantPoolTracker;
-import dev.silverandro.broadsword.internal.DataUtil;
-import dev.silverandro.broadsword.internal.RemapType;
 import dev.silverandro.broadsword.lookups.ClassMappingLookup;
 import dev.silverandro.broadsword.lookups.OutputStreamFactory;
 import dev.silverandro.broadsword.mappings.MappingsSet;
+import dev.silverandro.broadsword.meta.CTags;
+import dev.silverandro.broadsword.meta.ConstantPoolTracker;
+import dev.silverandro.broadsword.meta.DataUtil;
+import dev.silverandro.broadsword.meta.RemapType;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -268,7 +268,7 @@ public class ClassFileRemapper {
         var desc = utf8Copy[tracker.getDescIndex(index)];
         UTF8Container newOutput = mappingsSet.remapMethodOrNull(thisClass, original, desc);
         if (newOutput == null) {
-            // Check if the super class contains it, and also prepare for if it doesnt
+            // Check if the super class contains it, and also prepare for if it doesn't
             ClassMappingStruct superStruct;
             if (superClass.startsWithJava()) {
                 superStruct = new ClassMappingStruct(List.of(), Map.of());

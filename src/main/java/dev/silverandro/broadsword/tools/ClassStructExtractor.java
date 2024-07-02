@@ -5,9 +5,9 @@
 package dev.silverandro.broadsword.tools;
 
 import dev.silverandro.broadsword.ClassMappingStruct;
-import dev.silverandro.broadsword.internal.CTags;
-import dev.silverandro.broadsword.internal.ConstantPoolTracker;
-import dev.silverandro.broadsword.internal.DataUtil;
+import dev.silverandro.broadsword.meta.CTags;
+import dev.silverandro.broadsword.meta.ConstantPoolTracker;
+import dev.silverandro.broadsword.meta.DataUtil;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;

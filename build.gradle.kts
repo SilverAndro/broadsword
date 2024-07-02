@@ -18,9 +18,6 @@ java {
 
 repositories {
     mavenCentral()
-}
-
-repositories {
     maven {
         url = uri("https://maven.fabricmc.net/")
         name = "fabricmc maven"
@@ -33,6 +30,9 @@ repositories {
 dependencies {
     implementation("net.fabricmc:tiny-remapper:0.8.9")
     jmh("net.fabricmc:mapping-io:0.4.2")
+
+    implementation("org.ow2.asm:asm:9.7")
+    implementation("org.ow2.asm:asm-util:9.7")
 
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")

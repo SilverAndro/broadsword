@@ -4,7 +4,7 @@
 
 package dev.silverandro.broadsword.mappings;
 
-import dev.silverandro.broadsword.internal.DataUtil;
+import dev.silverandro.broadsword.meta.DataUtil;
 import dev.silverandro.broadsword.tools.UTF8Container;
 
 import java.io.ByteArrayOutputStream;
@@ -90,6 +90,26 @@ public class MappingsSet {
 
     public UTF8Container remapPackageOrNull(UTF8Container current) {
         return packageMapping.get(current);
+    }
+
+    public UTF8Container remapFieldSignature(UTF8Container current) throws IOException {
+        var output = new ByteArrayOutputStream();
+        var currentData = current.getData();
+
+        int i = -1;
+        while (i++ < currentData.length - 1) {
+            var c = currentData[i];
+            output.write(c);
+            if (c == 'L') {
+                var end = DataUtil.indexOf(currentData, (byte)';', i + 2);
+                var remapped = remapClass(new UTF8Container(Arrays.copyOfRange(currentData, i + 1, end))).getData();
+                output.write(remapped);
+                output.write(';');
+                i = end;
+            }
+        }
+
+        return new UTF8Container(output.toByteArray());
     }
 
     /**

@@ -2,7 +2,7 @@
  * Copyright 2023 SilverAndro. All Rights Reserved
  */
 
-package dev.silverandro.broadsword.meta;
+package dev.silverandro.broadsword.bench;
 
 import dev.silverandro.broadsword.ClassMappingStruct;
 import dev.silverandro.broadsword.lookups.ClassMappingLookup;

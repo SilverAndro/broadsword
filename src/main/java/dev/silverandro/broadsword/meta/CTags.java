@@ -2,7 +2,7 @@
  * Copyright 2023 SilverAndro. All Rights Reserved
  */
 
-package dev.silverandro.broadsword.internal;
+package dev.silverandro.broadsword.meta;
 
 /**
  * The tags of constant pool entries so we dont have to use raw values.

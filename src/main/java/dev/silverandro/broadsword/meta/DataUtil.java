@@ -2,11 +2,13 @@
  * Copyright 2023 SilverAndro. All Rights Reserved
  */
 
-package dev.silverandro.broadsword.internal;
+package dev.silverandro.broadsword.meta;
 
 import dev.silverandro.broadsword.tools.UTF8Container;
 
-import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -21,6 +23,11 @@ public final class DataUtil {
             i++;
         }
         return -1;
+    }
+
+    public static void writeContainer(UTF8Container in, DataOutputStream out) throws IOException {
+        out.writeShort(in.length());
+        out.write(in.getData(), 0, in.length());
     }
 
     /**
@@ -39,7 +46,7 @@ public final class DataUtil {
     /**
      * Copies bytes from a ByteBuffer to a ByteArrayOutputStream.
      */
-    public static void copyBytes(int count, ByteBuffer in, ByteArrayOutputStream out) {
+    public static void copyBytes(int count, ByteBuffer in, OutputStream out) throws IOException {
         out.write(in.array(), in.position(), count);
         in.position(in.position() + count);
     }

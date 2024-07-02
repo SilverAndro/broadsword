@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * A function provided to {@link ClassFileRemapper} that allows it to request a output stream for writing remapped
+ * A function provided to {@link ClassFileRemapper} that allows it to request an output stream for writing remapped
  * class data to. Streams are automatically closed
  */
 @FunctionalInterface
