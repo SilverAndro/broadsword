@@ -15,9 +15,9 @@ import java.util.concurrent.TimeUnit;
 
 @State(Scope.Benchmark)
 @Measurement(timeUnit = TimeUnit.MILLISECONDS)
-@BenchmarkMode(Mode.Throughput)
+@BenchmarkMode(Mode.AverageTime)
 public class ExtractStruct {
-    byte[] classFile;
+    private byte[] classFile;
 
     @Setup
     public void setup() throws IOException {

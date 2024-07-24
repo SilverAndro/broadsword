@@ -19,16 +19,23 @@ public final class ConstantPoolTracker {
     private final short[] ntData;
     // Works as both Class->UTF8Content and Name->Desc
     private final short[] contentMappings;
+    // Offsets into the constant pool
+    private final int[] offsets;
 
     public ConstantPoolTracker(int size) {
         indexToRemapType = new byte[size];
         ntData = new short[size];
         contentMappings = new short[size];
+        offsets = new int[size];
     }
 
     //
     // Put Operations
     //
+    public void putOffset(int index, int offset) {
+        offsets[index] = offset;
+    }
+
     public void putClass(int index, int contentIndex) {
         indexToRemapType[contentIndex] = RemapType.CLASS;
         contentMappings[index] = (short) contentIndex;
@@ -81,6 +88,10 @@ public final class ConstantPoolTracker {
     //
     // Get Operations
     //
+    public int getOffset(int index) {
+        return offsets[index];
+    }
+
     public int getClassContent(int index) {
         return contentMappings[index];
     }

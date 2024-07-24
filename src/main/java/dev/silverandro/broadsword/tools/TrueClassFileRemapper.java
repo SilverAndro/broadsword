@@ -48,6 +48,7 @@ public final class TrueClassFileRemapper {
         // Read through all the constant pool entries
         while (index < count) {
             var tag = input.get();
+            tracker.putOffset(index, input.position());
             switch (tag) {
                 case CTags.UTF8 -> {
                     var length = input.getShort();
@@ -197,7 +198,8 @@ public final class TrueClassFileRemapper {
     }
 
     private static void handleFieldAttribute(
-            short attrCount, ByteBuffer input,
+            short attrCount,
+            ByteBuffer input,
             ConstantPoolTracker tracker,
             UTF8Container[] utf8Copy,
             MappingsSet mappingsSet,
@@ -224,7 +226,8 @@ public final class TrueClassFileRemapper {
     }
 
     private static void handleMethodAttribute(
-            short attrCount, ByteBuffer input,
+            short attrCount,
+            ByteBuffer input,
             ConstantPoolTracker tracker,
             UTF8Container[] utf8Copy,
             MappingsSet mappingsSet,
@@ -243,6 +246,54 @@ public final class TrueClassFileRemapper {
                 var newSignature = mappingsSet.remapFieldSignature(signature);
                 var newSignatureIndex = cpb.insertUTF8(newSignature);
                 classBodyOS.writeShort(newSignatureIndex);
+            } else if (name.equals(CommonNames.CODE)) {
+                classBodyOS.writeInt(length);
+                handleCode(input, tracker, utf8Copy, mappingsSet, cpb, classBodyOS);
+            } else {
+                classBodyOS.writeInt(length);
+                DataUtil.copyBytes(length, input, classBodyOS);
+            }
+        }
+    }
+
+    private static void handleCode(
+            ByteBuffer input,
+            ConstantPoolTracker tracker,
+            UTF8Container[] utf8Copy,
+            MappingsSet mappingsSet,
+            ConstantPoolBuilder cpb,
+            DataOutputStream classBodyOS
+    ) throws IOException {
+        classBodyOS.writeInt(input.getInt());
+
+        var codeLength = input.getInt();
+        classBodyOS.writeInt(codeLength);
+
+        var exceptionTableLength = input.getShort();
+        classBodyOS.writeShort(exceptionTableLength);
+        while (exceptionTableLength-- > 0) {
+            classBodyOS.writeInt(input.getInt());
+            classBodyOS.writeShort(input.getShort());
+            var catchType = input.getShort();
+            if (catchType != 0) {
+                classBodyOS.writeShort(cpb.insertClass(mappingsSet.remapClass(utf8Copy[tracker.getClassContent(catchType)])));
+            } else {
+                classBodyOS.writeShort(0);
+            }
+        }
+
+        var attributeCount = input.getShort();
+        handleCodeAttributes(attributeCount, input, utf8Copy, cpb, classBodyOS);
+    }
+
+    private static void handleCodeAttributes(short attributeCount, ByteBuffer input, UTF8Container[] utf8Copy, ConstantPoolBuilder cpb, DataOutputStream classBodyOS) throws IOException {
+        while (attributeCount-- > 0) {
+            var nameIndex = input.getShort();
+            var name = utf8Copy[nameIndex];
+            cpb.insertUTF8(name);
+            var length = input.getInt();
+            if (name.equals(CommonNames.STACK_MAP_TABLE)) {
+
             } else {
                 classBodyOS.writeInt(length);
                 DataUtil.copyBytes(length, input, classBodyOS);
@@ -251,7 +302,8 @@ public final class TrueClassFileRemapper {
     }
 
     private static void handleClassAttribute(
-            short attributesCount, ByteBuffer input,
+            short attributesCount,
+            ByteBuffer input,
             ConstantPoolTracker tracker,
             UTF8Container[] utf8Copy,
             MappingsSet mappingsSet,
@@ -329,6 +381,19 @@ public final class TrueClassFileRemapper {
             } else if (name.equals(CommonNames.NEST_HOST)) {
                 classBodyOS.writeInt(2);
                 classBodyOS.writeShort(cpb.insertClass(mappingsSet.remapClass(utf8Copy[tracker.getClassContent(input.getShort())])));
+            } else if (name.equals(CommonNames.BOOTSTRAP_METHODS)) {
+                classBodyOS.writeInt(length);
+                var methodCount = input.getShort();
+                classBodyOS.writeShort(methodCount);
+                while (methodCount-- > 0) {
+                    var ref = input.getShort();
+                    classBodyOS.writeShort(cpb.copyMethodHandle(input, ref, utf8Copy, mappingsSet, tracker));
+                }
+                var argumentCount = input.getShort();
+                classBodyOS.writeShort(argumentCount);
+                while (argumentCount-- > 0) {
+
+                }
             } else {
                 classBodyOS.writeInt(length);
                 DataUtil.copyBytes(length, input, classBodyOS);
@@ -388,6 +453,44 @@ public final class TrueClassFileRemapper {
                 }
                 return nextIndex++;
             });
+        }
+
+        public short copyMethodHandle(ByteBuffer input, short index, UTF8Container[] utf8Copy, MappingsSet mappingsSet, ConstantPoolTracker tracker) throws IOException {
+            var currentOffset = tracker.getOffset(index);
+            var type = input.get(currentOffset);
+            os.writeByte(15);
+            os.writeByte(type);
+
+            var refIndex = input.getShort(currentOffset + 1);
+            var refOffset = tracker.getOffset(refIndex);
+            var tag = input.get(refOffset - 1);
+            var owner = utf8Copy[input.getShort(refOffset)];
+            var nt = input.getShort(refOffset + 2);
+            var name = utf8Copy[tracker.getNameNT(nt)];
+            var desc = utf8Copy[tracker.getDescIndex(nt)];
+            short newNt;
+            if (tag == 9) {
+                newNt = insertNT(mappingsSet.remapField(owner, name, desc), mappingsSet.remapDescriptor(desc));
+            } else {
+                newNt = insertNT(mappingsSet.remapMethod(owner, name, desc), mappingsSet.remapDescriptor(desc));
+            }
+            os.writeShort(newNt);
+            return nextIndex++;
+        }
+
+        public short copyLoadable(ByteBuffer input, short index, UTF8Container[] utf8Copy, MappingsSet mappingsSet, ConstantPoolTracker tracker) {
+            var offset = tracker.getOffset(index);
+            var tag = input.get(offset - 1);
+            switch (tag) {
+                case 7 -> {
+                    return insertClass(utf8Copy[tracker.getClassContent(input.getShort(offset))]);
+                }
+
+                case 9, 10, 11 -> {
+                    
+                }
+            }
+            return nextIndex++;
         }
     }
 }

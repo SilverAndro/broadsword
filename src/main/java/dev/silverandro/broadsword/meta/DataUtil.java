@@ -16,6 +16,17 @@ import java.util.Arrays;
  * Various utility methods for working with ByteBuffers
  */
 public final class DataUtil {
+    public static int readShort(byte[] data, int index) {
+        return (data[index] & 0xff) << 8  | (data[index + 1] & 0xff);
+    }
+
+    public static int readInt(byte[] data, int index) {
+        return ((data[index] & 0xFF) << 24) |
+                ((data[index + 1] & 0xFF) << 16) |
+                ((data[index + 2] & 0xFF) << 8 ) |
+                ((data[index + 3] & 0xFF));
+    }
+
     public static int indexOf(byte[] data, byte c, int start) {
         int i = start;
         while (i < data.length) {
@@ -37,6 +48,13 @@ public final class DataUtil {
         var out = new UTF8Container(Arrays.copyOfRange(in.array(), in.position(), in.position() + length));
         in.position(in.position() + length);
         return out;
+    }
+
+    /**
+     * Reads a UTF8 string of length {@code length} from the byte array.
+     */
+    public static UTF8Container readBytes(int length, byte[] in, int position) {
+        return new UTF8Container(Arrays.copyOfRange(in, position, position + length));
     }
 
     /**
